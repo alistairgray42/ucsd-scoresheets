@@ -4,8 +4,6 @@ import os
 import pickle
 import string
 
-from collections import OrderedDict
-
 from apiclient import discovery
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -66,7 +64,8 @@ bonuses = dict()
 # 10
 # -5
 # 0: Opponent converted
-# -1: Did not convert after opponent neg
+# -1: Did not hear
+# -2: Dead
 
 # Bonuses:
 # 0:  000
@@ -111,11 +110,11 @@ for round_num in (1, 2, 3):
             t1_tu = assign_tu(values[row_num][:6])
             t2_tu = assign_tu(values[row_num][12:18])
 
-            if t1_tu == 0 and t2_tu == -5:
-                t1_tu = -1
+            if t1_tu == 0 and t2_tu <= 0:
+                t1_tu = -2
 
-            if t2_tu == 0 and t1_tu == -5:
-                t2_tu = -1
+            if t2_tu == 0 and t1_tu <= 0:
+                t2_tu = -2
 
             t1_b = assign_b(values[row_num][6:9]) if t1_tu > 0 else -1
             t2_b = assign_b(values[row_num][18:21]) if t2_tu > 0 else -1
