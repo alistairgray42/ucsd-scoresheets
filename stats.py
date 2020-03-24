@@ -4,6 +4,8 @@ import os
 import pickle
 import string
 
+import numpy as np
+
 from apiclient import discovery
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -136,4 +138,30 @@ for round_num in (1, 2, 3):
         bonuses[team_1][round_num] = t1_bs
         tossups[team_2][round_num] = t2_tus
         bonuses[team_2][round_num] = t2_bs
+
+# delete placeholder team names
+del tossups["Team A"]
+del tossups["Team B"]
+del bonuses["Team A"]
+del bonuses["Team B"]
+
+max_round_num = 0
+for team in tossups.values():
+    if max(team.keys()) > max_round_num:
+        max_round_num = max(team.keys())
+
+num_teams = len(tossups)
+
+np_tossups = np.full((num_teams, max_round_num, 20), -1)
+np_bonuses = np.full((num_teams, max_round_num, 20), -1)
+
+team_names = list(tossups.keys())
+
+for team_number, team_data in enumerate(tossups.values()):
+    for round_num, tossup_data in team_data.items():
+        np_tossups[team_number][round_num - 1] = tossup_data
+
+for team_number, team_data in enumerate(bonuses.values()):
+    for round_num, bonus_data in team_data.items():
+        np_bonuses[team_number][round_num - 1] = bonus_data
 
