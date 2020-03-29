@@ -123,14 +123,17 @@ for round_num in (1, 2, 3):
 
             t1_tus.append(t1_tu)
             t2_tus.append(t2_tu)
-            t1_bs.append(t1_b)
-            t2_bs.append(t2_b)
+
+            # track bonuses of dead tossups correctly
+            if t1_tu > 0 or t2_tu > 0:
+                t1_bs.append(t1_b)
+                t2_bs.append(t2_b)
 
         if team_1 not in tossups:
             tossups[team_1] = dict()
             bonuses[team_1] = dict()
 
-        if team_2 not in bonuses:
+        if team_2 not in tossups:
             tossups[team_2] = dict()
             bonuses[team_2] = dict()
 
@@ -159,9 +162,9 @@ team_names = list(tossups.keys())
 
 for team_number, team_data in enumerate(tossups.values()):
     for round_num, tossup_data in team_data.items():
-        np_tossups[team_number][round_num - 1] = tossup_data
+        np_tossups[team_number][round_num - 1][:len(tossup_data)] = tossup_data
 
 for team_number, team_data in enumerate(bonuses.values()):
     for round_num, bonus_data in team_data.items():
-        np_bonuses[team_number][round_num - 1] = bonus_data
+        np_bonuses[team_number][round_num - 1][:len(bonus_data)] = bonus_data
 
