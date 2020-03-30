@@ -13,6 +13,27 @@ from google.auth.transport.requests import Request
 from copy import copy
 from time import sleep
 
+# Constants for checkboxed sheets
+RANGE_START = "C1"
+RANGE_END = "W23"
+
+NUM_PLAYERS = 6
+B_COL_LEN = 3
+T2_START = 12
+
+# Constants for noncheckboxed sheets
+RANGE_START = "C1"
+RANGE_END = "S23"
+
+NUM_PLAYERS = 6
+B_COL_LEN = 1
+T2_START = 10
+
+
+T1_B_START = NUM_PLAYERS
+T2_B_START = T2_START + NUM_PLAYERS
+
+
 # If modifying these scopes, delete your previously saved credentials
 # at ~/.credentials/sheets.googleapis.com-python-quickstart.json
 # SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
@@ -87,6 +108,9 @@ def assign_tu(data):
     return 0
 
 def assign_b(data):
+    if len(data) == 1:
+        return int(data[0])
+
     ret = 0
     if data[0] == 'TRUE':
         ret += 4
@@ -97,9 +121,17 @@ def assign_b(data):
     return ret
 
 for round_num in (1, 2, 3):
-    for scoresheet_id in ["1gybKKlNuxY53dIpABV26pPS1je2zCJrYd9Xxb3P_SCY"]:
+    # for scoresheet_id in ["1gybKKlNuxY53dIpABV26pPS1je2zCJrYd9Xxb3P_SCY"]:
+    for scoresheet_id in ["1qApfWqcmTYfyJor9F9rdFZYzAta_yeCeVB1iRkNispg",
+                          "1NlT5-i21IWUTlTfNyhPzks5hA79I1oyBe3cARD8I4Go",
+                          "18i1tHZ_apRm9JUyDxb0lQzbX_8fl0ED2f4yrdUh813k",
+                          "1MeAlXLotLaLF7JCY6uQCtCnddEqPPW_Zs2rfbrRfjoA",
+                          "17sQtdq0FfHlRuShYGTxJ8WzPsIWOCX4em-iRXJTau0I",
+                          "10qh1x0XtG8NrQ_ZE6S3rNVtmXulE80DattBkkku22qM",
+                          "1lFz3-4X-4FNw0stQaobsg0r6TQ13mvIFzwoyh4omz10",
+                          "1uMJ-IsuOKmVfLNDgCZu45_8tQd1xXEzsj9cKC14Fa60"]:
         result = sheets.values().get(spreadsheetId=scoresheet_id,
-                                     range=f"Round {round_num}!C1:W23").execute()
+                                     range=f"Round {round_num}!{RANGE_START}:{RANGE_END}").execute()
         values = result.get('values', [])
         team_1, team_2 = values[0][0], values[0][-1]
 
@@ -109,8 +141,8 @@ for round_num in (1, 2, 3):
         t2_bs = []
 
         for row_num in range(3, len(values)):
-            t1_tu = assign_tu(values[row_num][:6])
-            t2_tu = assign_tu(values[row_num][12:18])
+            t1_tu = assign_tu(values[row_num][:NUM_PLAYERS])
+            t2_tu = assign_tu(values[row_num][T2_START : T2_START+NUM_PLAYERS])
 
             if t1_tu == 0 and t2_tu <= 0:
                 t1_tu = -2
@@ -118,8 +150,8 @@ for round_num in (1, 2, 3):
             if t2_tu == 0 and t1_tu <= 0:
                 t2_tu = -2
 
-            t1_b = assign_b(values[row_num][6:9]) if t1_tu > 0 else -1
-            t2_b = assign_b(values[row_num][18:21]) if t2_tu > 0 else -1
+            t1_b = assign_b(values[row_num][T1_B_START : T1_B_START+B_COL_LEN]) if t1_tu > 0 else -1
+            t2_b = assign_b(values[row_num][T2_B_START : T2_B_START+B_COL_LEN]) if t2_tu > 0 else -1
 
             t1_tus.append(t1_tu)
             t2_tus.append(t2_tu)
@@ -143,10 +175,11 @@ for round_num in (1, 2, 3):
         bonuses[team_2][round_num] = t2_bs
 
 # delete placeholder team names
-del tossups["Team A"]
-del tossups["Team B"]
-del bonuses["Team A"]
-del bonuses["Team B"]
+if "Team A" in tossups:
+    del tossups["Team A"]
+    del tossups["Team B"]
+    del bonuses["Team A"]
+    del bonuses["Team B"]
 
 max_round_num = 0
 for team in tossups.values():
