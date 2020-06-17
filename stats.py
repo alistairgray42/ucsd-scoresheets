@@ -3,6 +3,8 @@ import httplib2
 import os
 import pickle
 import string
+import json
+import time
 
 import numpy as np
 
@@ -21,6 +23,7 @@ NUM_PLAYERS = 6
 B_COL_LEN = 3
 T2_START = 12
 
+"""
 # Constants for noncheckboxed sheets
 RANGE_START = "C1"
 RANGE_END = "S23"
@@ -28,7 +31,7 @@ RANGE_END = "S23"
 NUM_PLAYERS = 6
 B_COL_LEN = 1
 T2_START = 10
-
+"""
 
 T1_B_START = NUM_PLAYERS
 T2_B_START = T2_START + NUM_PLAYERS
@@ -120,84 +123,150 @@ def assign_b(data):
         ret += 1
     return ret
 
-for round_num in (1, 2, 3):
-    # for scoresheet_id in ["1gybKKlNuxY53dIpABV26pPS1je2zCJrYd9Xxb3P_SCY"]:
-    for scoresheet_id in ["1qApfWqcmTYfyJor9F9rdFZYzAta_yeCeVB1iRkNispg",
-                          "1NlT5-i21IWUTlTfNyhPzks5hA79I1oyBe3cARD8I4Go",
-                          "18i1tHZ_apRm9JUyDxb0lQzbX_8fl0ED2f4yrdUh813k",
-                          "1MeAlXLotLaLF7JCY6uQCtCnddEqPPW_Zs2rfbrRfjoA",
-                          "17sQtdq0FfHlRuShYGTxJ8WzPsIWOCX4em-iRXJTau0I",
-                          "10qh1x0XtG8NrQ_ZE6S3rNVtmXulE80DattBkkku22qM",
-                          "1lFz3-4X-4FNw0stQaobsg0r6TQ13mvIFzwoyh4omz10",
-                          "1uMJ-IsuOKmVfLNDgCZu45_8tQd1xXEzsj9cKC14Fa60"]:
-        result = sheets.values().get(spreadsheetId=scoresheet_id,
-                                     range=f"Round {round_num}!{RANGE_START}:{RANGE_END}").execute()
-        values = result.get('values', [])
-        team_1, team_2 = values[0][0], values[0][-1]
+def read_scoresheets():
+    for round_num in range(1, 12):
+        """
+        for scoresheet_id in [ "1fW2a_7IhQoOzb4Pbq4Cck8TWEd3KST2zYlJOM34UFsw",  # AM
+                            "1cm_X3R9kyX9NSzXc_h6kwN8K-rFJ4A9ejlzQvNLHTfs",  # CA
+                            "1KWxsh9SG3hVv9oPANMgBaVu2paCaXZJ9mvvLlmmgBxM",  # EL
+                            "1iJdRBE9FsstO4PIFL9Isz2g_G888lujytutxC-2IQHE",  # EU
+                            "1AzvmJUTjCKCtcFZdPPUypMae-o2dFtCNd6W3bzhDNkQ",  # GA
+                            "1tUU0c3PtXX2awuRSUBmvxHsrsdDZbBEHuBRDhnFrD-w",  # HI
+                            "1ifT3Ry5bEZqxydr--mBpFlNk3JKncLFQ9_WRScDLIjA",  # IO
+                            "1aWiCum5G4tEBY8UY9HRYJh2zc4-zDFrbgYP3Pz-HF_Y"]: # TH
+        """
+        for scoresheet_id in [ "1BjMO6lGSM3wCcLFcUsd57s908ktAxfYUCA8YYGm8AaA", # AN
+                               "1Oq9nrm41jsr0IO2jy9Tl3OxRgzPmVTjNCC1dV3EvnGo", # AT
+                               "1vQ6tZiqSyT-69QEKfR9wL5y_Z7lWBrNH_7k-oQQzLaM", # HE
+                               "1f61R63mu1tAKpOmoWf9w9HLzAUCCpFin44QWAHfw6Yw", # HI
+                               "10vyI4LZlhOEqpW5yJSUAMKtRYzj38czIkJkri44dT5Q", # LO
+                               "1EutvpQxciHIwLps-CaPHcmVS9ZXfsvfZPAsA8hN1d6E", # OR
+                               "1bLSaXbbKtxAGirTRuf-waexc4uifg-NBHeCiGjeUL9I", # OU
+                               "1aD3Ft0T0DLMw0x5-0FmiLhjgyC9BX9AEeB21nFdyboA"]: # PR
 
-        t1_tus = []
-        t2_tus = []
-        t1_bs = []
-        t2_bs = []
+            result = sheets.values().get(spreadsheetId=scoresheet_id,
+                                        range=f"Round {round_num}!{RANGE_START}:{RANGE_END}").execute()
+            values = result.get('values', [])
+            team_1, team_2 = values[0][0], values[0][-1]
 
-        for row_num in range(3, len(values)):
-            t1_tu = assign_tu(values[row_num][:NUM_PLAYERS])
-            t2_tu = assign_tu(values[row_num][T2_START : T2_START+NUM_PLAYERS])
+            t1_tus = []
+            t2_tus = []
+            t1_bs = []
+            t2_bs = []
 
-            if t1_tu == 0 and t2_tu <= 0:
-                t1_tu = -2
+            for row_num in range(3, len(values)):
+                t1_tu = assign_tu(values[row_num][:NUM_PLAYERS])
+                t2_tu = assign_tu(values[row_num][T2_START : T2_START+NUM_PLAYERS])
 
-            if t2_tu == 0 and t1_tu <= 0:
-                t2_tu = -2
+                if t1_tu == 0 and t2_tu <= 0:
+                    t1_tu = -2
 
-            t1_b = assign_b(values[row_num][T1_B_START : T1_B_START+B_COL_LEN]) if t1_tu > 0 else -1
-            t2_b = assign_b(values[row_num][T2_B_START : T2_B_START+B_COL_LEN]) if t2_tu > 0 else -1
+                if t2_tu == 0 and t1_tu <= 0:
+                    t2_tu = -2
 
-            t1_tus.append(t1_tu)
-            t2_tus.append(t2_tu)
+                t1_b = assign_b(values[row_num][T1_B_START : T1_B_START+B_COL_LEN]) if t1_tu > 0 else -1
+                t2_b = assign_b(values[row_num][T2_B_START : T2_B_START+B_COL_LEN]) if t2_tu > 0 else -1
 
-            # track bonuses of dead tossups correctly
-            if t1_tu > 0 or t2_tu > 0:
-                t1_bs.append(t1_b)
-                t2_bs.append(t2_b)
+                t1_tus.append(t1_tu)
+                t2_tus.append(t2_tu)
 
-        if team_1 not in tossups:
-            tossups[team_1] = dict()
-            bonuses[team_1] = dict()
+                # track bonuses of dead tossups correctly
+                if t1_tu > 0 or t2_tu > 0:
+                    t1_bs.append(t1_b)
+                    t2_bs.append(t2_b)
 
-        if team_2 not in tossups:
-            tossups[team_2] = dict()
-            bonuses[team_2] = dict()
+            if team_1 not in tossups:
+                tossups[team_1] = dict()
+                bonuses[team_1] = dict()
 
-        tossups[team_1][round_num] = t1_tus
-        bonuses[team_1][round_num] = t1_bs
-        tossups[team_2][round_num] = t2_tus
-        bonuses[team_2][round_num] = t2_bs
+            if team_2 not in tossups:
+                tossups[team_2] = dict()
+                bonuses[team_2] = dict()
 
-# delete placeholder team names
-if "Team A" in tossups:
-    del tossups["Team A"]
-    del tossups["Team B"]
-    del bonuses["Team A"]
-    del bonuses["Team B"]
+            tossups[team_1][round_num] = t1_tus
+            bonuses[team_1][round_num] = t1_bs
+            tossups[team_2][round_num] = t2_tus
+            bonuses[team_2][round_num] = t2_bs
 
-max_round_num = 0
-for team in tossups.values():
-    if max(team.keys()) > max_round_num:
-        max_round_num = max(team.keys())
+            print("Round {}: {}".format(round_num, scoresheet_id))
+            time.sleep(1)
+        time.sleep(2)
 
-num_teams = len(tossups)
+    # delete placeholder team names
+    if "Team A" in tossups:
+        del tossups["Team A"]
+        del tossups["Team B"]
+        del bonuses["Team A"]
+        del bonuses["Team B"]
 
-np_tossups = np.full((num_teams, max_round_num, 20), -1)
-np_bonuses = np.full((num_teams, max_round_num, 20), -1)
+    max_round_num = 0
+    for team in tossups.values():
+        if max(team.keys()) > max_round_num:
+            max_round_num = max(team.keys())
 
-team_names = list(tossups.keys())
+    num_teams = len(tossups)
 
-for team_number, team_data in enumerate(tossups.values()):
-    for round_num, tossup_data in team_data.items():
-        np_tossups[team_number][round_num - 1][:len(tossup_data)] = tossup_data
+    np_tossups = np.full((num_teams, max_round_num, 20), -1)
+    np_bonuses = np.full((num_teams, max_round_num, 20), -1)
 
-for team_number, team_data in enumerate(bonuses.values()):
-    for round_num, bonus_data in team_data.items():
-        np_bonuses[team_number][round_num - 1][:len(bonus_data)] = bonus_data
+    team_names = list(tossups.keys())
 
+    for team_number, team_data in enumerate(tossups.values()):
+        for round_num, tossup_data in team_data.items():
+            np_tossups[team_number][round_num - 1][:len(tossup_data)] = tossup_data
+
+    for team_number, team_data in enumerate(bonuses.values()):
+        for round_num, bonus_data in team_data.items():
+            np_bonuses[team_number][round_num - 1][:len(bonus_data)] = bonus_data
+
+    with open("stan_stats", "w") as f:
+        json.dump({"tossups": tossups, "bonuses": bonuses, "teams": team_names}, f)
+
+def compute_p_n_counts(data):
+    stats = {(i, j) : 0 for i in range(17) for j in range(17)}
+
+    for packet in range(1, 10):
+        for tossup in range(20):
+            powers = 0
+            negs = 0
+            for team in data["teams"]:
+                if str(packet) not in data["tossups"][team]:
+                    continue
+                value = data["tossups"][team][str(packet)][tossup]
+                if value == 15:
+                    powers += 1
+                if value == -5:
+                    negs += 1
+            stats[(powers, negs)] += 1
+
+    for i in range(17):
+        for j in range(17):
+            print(stats[(i,j)], end=" ")
+        print()
+
+def compute_conversion(data):
+    for packet in range(1, 11):
+        for tossup in range(20):
+            tu_stats = {15: 0, 10: 0, -5: 0}
+            for team in data["teams"]:
+                if str(packet) not in data["tossups"][team]:
+                    continue
+                points = data["tossups"][team][str(packet)][tossup]
+                if points in tu_stats:
+                    tu_stats[points] += 1
+            print("{}/{}/{}".format(tu_stats[15], tu_stats[10], tu_stats[-5]), end="\t")
+        print("")
+
+# read_scoresheets()
+
+# with open("stan_stats", "r") as f:
+s = open("stan_stats", "r")
+s_data = json.load(s)
+c = open("comp_stats", "r")
+c_data = json.load(c)
+
+merged = {"tossups": {**c_data["tossups"], **s_data["tossups"]},
+          "bonuses": {**c_data["bonuses"], **s_data["bonuses"]},
+          "teams"  : c_data["teams"] + s_data["teams"]}
+
+compute_p_n_counts(merged)
