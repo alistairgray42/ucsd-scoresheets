@@ -49,6 +49,8 @@ CLIENT_SECRET_FILE = 'client_secrets.json'
 APPLICATION_NAME = 'Google Sheets API Python Quickstart'
 
 # from Google Sheets API v4 Python quickstart
+
+
 def get_credentials(filename):
     creds = None
     # The file  stores the user's access and refresh tokens, and is
@@ -104,11 +106,13 @@ bonuses = dict()
 # 7:  111
 # -1: Did not hear
 
+
 def assign_tu(data):
     for val in data:
         if val != '':
             return int(val)
     return 0
+
 
 def assign_b(data):
     if len(data) == 1:
@@ -123,6 +127,7 @@ def assign_b(data):
         ret += 1
     return ret
 
+
 def read_scoresheets():
     for round_num in range(1, 12):
         """
@@ -135,17 +140,17 @@ def read_scoresheets():
                             "1ifT3Ry5bEZqxydr--mBpFlNk3JKncLFQ9_WRScDLIjA",  # IO
                             "1aWiCum5G4tEBY8UY9HRYJh2zc4-zDFrbgYP3Pz-HF_Y"]: # TH
         """
-        for scoresheet_id in [ "1BjMO6lGSM3wCcLFcUsd57s908ktAxfYUCA8YYGm8AaA", # AN
-                               "1Oq9nrm41jsr0IO2jy9Tl3OxRgzPmVTjNCC1dV3EvnGo", # AT
-                               "1vQ6tZiqSyT-69QEKfR9wL5y_Z7lWBrNH_7k-oQQzLaM", # HE
-                               "1f61R63mu1tAKpOmoWf9w9HLzAUCCpFin44QWAHfw6Yw", # HI
-                               "10vyI4LZlhOEqpW5yJSUAMKtRYzj38czIkJkri44dT5Q", # LO
-                               "1EutvpQxciHIwLps-CaPHcmVS9ZXfsvfZPAsA8hN1d6E", # OR
-                               "1bLSaXbbKtxAGirTRuf-waexc4uifg-NBHeCiGjeUL9I", # OU
-                               "1aD3Ft0T0DLMw0x5-0FmiLhjgyC9BX9AEeB21nFdyboA"]: # PR
+        for scoresheet_id in ["1BjMO6lGSM3wCcLFcUsd57s908ktAxfYUCA8YYGm8AaA",  # AN
+                              "1Oq9nrm41jsr0IO2jy9Tl3OxRgzPmVTjNCC1dV3EvnGo",  # AT
+                              "1vQ6tZiqSyT-69QEKfR9wL5y_Z7lWBrNH_7k-oQQzLaM",  # HE
+                              "1f61R63mu1tAKpOmoWf9w9HLzAUCCpFin44QWAHfw6Yw",  # HI
+                              "10vyI4LZlhOEqpW5yJSUAMKtRYzj38czIkJkri44dT5Q",  # LO
+                              "1EutvpQxciHIwLps-CaPHcmVS9ZXfsvfZPAsA8hN1d6E",  # OR
+                              "1bLSaXbbKtxAGirTRuf-waexc4uifg-NBHeCiGjeUL9I",  # OU
+                              "1aD3Ft0T0DLMw0x5-0FmiLhjgyC9BX9AEeB21nFdyboA"]:  # PR
 
             result = sheets.values().get(spreadsheetId=scoresheet_id,
-                                        range=f"Round {round_num}!{RANGE_START}:{RANGE_END}").execute()
+                                         range=f"Round {round_num}!{RANGE_START}:{RANGE_END}").execute()
             values = result.get('values', [])
             team_1, team_2 = values[0][0], values[0][-1]
 
@@ -156,7 +161,8 @@ def read_scoresheets():
 
             for row_num in range(3, len(values)):
                 t1_tu = assign_tu(values[row_num][:NUM_PLAYERS])
-                t2_tu = assign_tu(values[row_num][T2_START : T2_START+NUM_PLAYERS])
+                t2_tu = assign_tu(
+                    values[row_num][T2_START: T2_START+NUM_PLAYERS])
 
                 if t1_tu == 0 and t2_tu <= 0:
                     t1_tu = -2
@@ -164,8 +170,10 @@ def read_scoresheets():
                 if t2_tu == 0 and t1_tu <= 0:
                     t2_tu = -2
 
-                t1_b = assign_b(values[row_num][T1_B_START : T1_B_START+B_COL_LEN]) if t1_tu > 0 else -1
-                t2_b = assign_b(values[row_num][T2_B_START : T2_B_START+B_COL_LEN]) if t2_tu > 0 else -1
+                t1_b = assign_b(
+                    values[row_num][T1_B_START: T1_B_START+B_COL_LEN]) if t1_tu > 0 else -1
+                t2_b = assign_b(
+                    values[row_num][T2_B_START: T2_B_START+B_COL_LEN]) if t2_tu > 0 else -1
 
                 t1_tus.append(t1_tu)
                 t2_tus.append(t2_tu)
@@ -213,17 +221,21 @@ def read_scoresheets():
 
     for team_number, team_data in enumerate(tossups.values()):
         for round_num, tossup_data in team_data.items():
-            np_tossups[team_number][round_num - 1][:len(tossup_data)] = tossup_data
+            np_tossups[team_number][round_num -
+                                    1][:len(tossup_data)] = tossup_data
 
     for team_number, team_data in enumerate(bonuses.values()):
         for round_num, bonus_data in team_data.items():
-            np_bonuses[team_number][round_num - 1][:len(bonus_data)] = bonus_data
+            np_bonuses[team_number][round_num -
+                                    1][:len(bonus_data)] = bonus_data
 
     with open("stan_stats", "w") as f:
-        json.dump({"tossups": tossups, "bonuses": bonuses, "teams": team_names}, f)
+        json.dump({"tossups": tossups, "bonuses": bonuses,
+                   "teams": team_names}, f)
+
 
 def compute_p_n_counts(data):
-    stats = {(i, j) : 0 for i in range(17) for j in range(17)}
+    stats = {(i, j): 0 for i in range(17) for j in range(17)}
 
     for packet in range(1, 10):
         for tossup in range(20):
@@ -241,8 +253,9 @@ def compute_p_n_counts(data):
 
     for i in range(17):
         for j in range(17):
-            print(stats[(i,j)], end=" ")
+            print(stats[(i, j)], end=" ")
         print()
+
 
 def compute_conversion(data):
     for packet in range(1, 11):
@@ -254,10 +267,12 @@ def compute_conversion(data):
                 points = data["tossups"][team][str(packet)][tossup]
                 if points in tu_stats:
                     tu_stats[points] += 1
-            print("{}/{}/{}".format(tu_stats[15], tu_stats[10], tu_stats[-5]), end="\t")
+            print("{}/{}/{}".format(tu_stats[15],
+                                    tu_stats[10], tu_stats[-5]), end="\t")
         print("")
 
 # read_scoresheets()
+
 
 # with open("stan_stats", "r") as f:
 s = open("stan_stats", "r")
@@ -267,6 +282,6 @@ c_data = json.load(c)
 
 merged = {"tossups": {**c_data["tossups"], **s_data["tossups"]},
           "bonuses": {**c_data["bonuses"], **s_data["bonuses"]},
-          "teams"  : c_data["teams"] + s_data["teams"]}
+          "teams": c_data["teams"] + s_data["teams"]}
 
 compute_p_n_counts(merged)

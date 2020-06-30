@@ -1,0 +1,61 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Convert to SQBS</title>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="/static/style.css">
+	<script>
+	$(document).ready(()=>{
+		$("#submit").click((e)=>{
+			agg = $("#agg_id").val();
+			email = $("#email").val();
+			num_rounds = $("#num_rounds").val()
+			num_rooms = $("#num_rooms").val()
+			powers = $('input[type=radio][name=powers]:checked').val() == 'powers'
+			divisions = $('input[type=radio][name=divisions]:checked').val() == 'divisions'
+			
+			a = {};
+			a.agg = agg;
+			a.email = email;
+			a.num_rounds = num_rounds;
+			a.num_rooms = num_rooms;
+			a.powers = powers;
+			a.divisions = divisions;
+			
+			$.get("/convert/submit", a, (data)=>{
+				if(data.error){
+					alert(data.error);
+				}
+				else if(data.success){
+					alert("Scoresheet generation request successful. If you do not receive an email at " + data.success + " within the next hour, please contact me")
+				}
+			}, "json");
+			
+		})
+		
+	});
+	</script>
+</head>
+<body>
+		<div id="wrapper">
+		<h3>ID/Link to aggregate sheet:</h3>
+		<input type="text" id="agg_id" placeholder="Master Aggregate ID">
+		<h3>Notification email:</h3>
+		<input type="text" id="email" placeholder="Notification Email">
+		<h3>Number of rounds completed:</h3>
+		<input type="text" id="num_rounds" placeholder="Number of Rounds">
+		<h3>Number of rooms used:</h3>
+		<input type="text" id="num_rooms" placeholder="Number of Rooms">
+		<h3>Does the set use powers (15)?</h3>
+		<input type="radio" value="powers" name="powers" checked>Powers<br>
+		<input type="radio" value="No" name="powers">No Powers<br>
+		<h3>Are you using brackets?</h3>
+		<input type="radio" value="divisions" name="divisions" checked>Brackets<br>
+		<input type="radio" value="No" name="divisions">No Brackets<br><br>
+		<button id="submit">Submit</button>
+		</div>
+		
+		
+	
+</body>
+</html>

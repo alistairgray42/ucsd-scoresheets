@@ -5,6 +5,7 @@
 # Secrets
 
 client_secrets.json
+creds.py
 drive.json
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,django,visualstudiocode,vim,react

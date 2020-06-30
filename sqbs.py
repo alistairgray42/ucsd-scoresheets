@@ -4,8 +4,6 @@ import os
 import pickle
 import string
 
-import numpy as np
-
 from apiclient import discovery
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -29,6 +27,8 @@ CLIENT_SECRET_FILE = 'client_secrets.json'
 APPLICATION_NAME = 'Google Sheets API Python Quickstart'
 
 # from Google Sheets API v4 Python quickstart
+
+
 def get_credentials(filename):
     creds = None
     # The file  stores the user's access and refresh tokens, and is
@@ -65,9 +65,10 @@ sheets = service.spreadsheets()
 # standard
 scoresheet_id = "1bUOVvP6eOXx7t5cWQVBvSvk9IzR67mNp6j9PdbYrAvg"
 
+
 def get_games_from_round(round_num):
     result = sheets.values().get(spreadsheetId=scoresheet_id,
-                                    range=f"Round {round_num}!{RANGE_START}:{RANGE_END}").execute()
+                                 range=f"Round {round_num}!{RANGE_START}:{RANGE_END}").execute()
     values = result.get('values', [])
 
     games = list()
@@ -75,7 +76,7 @@ def get_games_from_round(round_num):
     # hardcoding in that entries are ten rows tall, and a whole bunch of information about where
     # things are in the entries
     for game_num in range((len(values) + 1) // 10):
-        game = values[10 * game_num : 10 * game_num + 8]
+        game = values[10 * game_num: 10 * game_num + 8]
 
         game_rep = {}
 
@@ -107,9 +108,9 @@ def get_games_from_round(round_num):
 
             game_rep["team_1_players"][player_name] = \
                 {"TUH": int(game[3][col]),
-                "15": int(game[4][col]),
-                "10": int(game[5][col]),
-                "-5": int(game[6][col])}
+                 "15": int(game[4][col]),
+                 "10": int(game[5][col]),
+                 "-5": int(game[6][col])}
 
         # team 2 players
 
@@ -121,22 +122,26 @@ def get_games_from_round(round_num):
 
             game_rep["team_2_players"][player_name] = \
                 {"TUH": int(game[3][col]),
-                "15": int(game[4][col]),
-                "10": int(game[5][col]),
-                "-5": int(game[6][col])}
+                 "15": int(game[4][col]),
+                 "10": int(game[5][col]),
+                 "-5": int(game[6][col])}
 
-        game_rep["team_1_bh"] = sum([p["15"] + p["10"] for p in game_rep["team_1_players"].values()])
-        game_rep["team_2_bh"] = sum([p["15"] + p["10"] for p in game_rep["team_2_players"].values()])
+        game_rep["team_1_bh"] = sum([p["15"] + p["10"]
+                                     for p in game_rep["team_1_players"].values()])
+        game_rep["team_2_bh"] = sum([p["15"] + p["10"]
+                                     for p in game_rep["team_2_players"].values()])
 
         games.append(game_rep)
 
     return games
+
 
 def extract_teams_from_game(game):
     teams = dict()
     teams[game['team_1_name']] = set(game['team_1_players'].keys())
     teams[game['team_2_name']] = set(game['team_2_players'].keys())
     return teams
+
 
 def extract_teams_from_games(games):
     all_teams = dict()
@@ -149,14 +154,15 @@ def extract_teams_from_games(games):
                 all_teams[team] = all_teams[team].union(teams[team])
     return all_teams
 
+
 def lookup_item_in_dict(items, item):
     # an awful hack for which i am very ashamed
     for i, t in enumerate(list(items)):
         if item == t:
             return i
 
-def generate_sqbs_file(tournament_name, games, teams):
 
+def generate_sqbs_file(tournament_name, games, teams):
     """Number of teams
     For each team:
         1 plus the number of players (i.e., information on how many of the following lines to associate with this team)
@@ -215,8 +221,8 @@ def generate_sqbs_file(tournament_name, games, teams):
         """
 
         print(0)
-        print(0) # unclear about these two
-        print(0) # unclear about these two
+        print(0)  # unclear about these two
+        print(0)  # unclear about these two
         print(0)
         print(0)
         print(0)
@@ -308,7 +314,7 @@ def generate_sqbs_file(tournament_name, games, teams):
     print(1)
     print(1)
     print(0)
-    print(1) # <== This is Divisions
+    print(1)  # <== This is Divisions
     print(1)
 
     """
@@ -392,7 +398,6 @@ def generate_sqbs_file(tournament_name, games, teams):
     print(0)
     print(0)
 
-
     """
     The number of teams
     For each team according to its index, 1 if it is an exhibition team, otherwise 0. (This leaf node in our documentation represents as many lines as there are teams.)
@@ -400,6 +405,7 @@ def generate_sqbs_file(tournament_name, games, teams):
     print(len(teams))
     for i in range(len(teams)):
         print(0)
+
 
 games = get_games_from_round(1)
 for i in range(2, 10):
