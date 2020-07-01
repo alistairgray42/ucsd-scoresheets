@@ -173,6 +173,11 @@ def serve_index():
     return render_template("info.html")
 
 
+@app.route("/about")
+def serve_about():
+    return render_template("about.html")
+
+
 @app.route("/create")
 def create_index():
     # return serve_static("create_form.html")
@@ -199,7 +204,7 @@ def create():
 
 @app.route("/convert")
 def convert_index():
-    return serve_static("convert_form.html")
+    return render_template("convert_form.html")
 
 
 @app.route("/convert/submit")

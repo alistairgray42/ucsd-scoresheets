@@ -56,12 +56,12 @@
 	{% include 'header.html' %}
 	<div id="wrapper">
 		<form>
-			<div id="form-grid">
+			<div class="form-grid">
 				<label class="input-prompt" for="tourney_name">Tournament name:</label>
 				<input type="text" id="tourney_name" placeholder="Tournament name" required>
 
 				<label class="input-prompt" for="email">Email:</label>
-				<input type="text" id="email" placeholder="Email" required>
+				<input type="email" id="email" placeholder="Email" required vali>
 
 				<label class="input-prompt" for="bonus_tracking">Track bonus parts individually?</label>
 				<div class="centering-div">
@@ -69,7 +69,7 @@
 				</div>
 
 				<label class="input-prompt" for="rooms">List of rooms (max 35):</label>
-				<textarea id="rooms" placeholder="Rooms (one per line)"></textarea>
+				<textarea id="rooms" placeholder="Rooms (one per line)" required></textarea>
 			</div>
 
 			<div class="centering-div">

@@ -17,12 +17,21 @@ body {
 	background-color: aliceblue;
 }
 
-#page-header{
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
+li {
+	margin-bottom: 5px;
+}
 
-	padding-bottom: 2%;
+#page-header{
+	margin-left: auto;
+	margin-right: auto;
+
+	margin-bottom: 1.5%;
+	padding: 1.5% 3% 1.5% 3%;
+
+	background-color: rgb(180, 233, 180);
+	border: 1px solid black;
+
+	max-width: 600px;
 }
 
 .header-row{
@@ -32,36 +41,41 @@ body {
 }
 
 #wrapper{
-	max-width: 500px;
+	max-width: 600px;
+
 	margin-left: auto;
 	margin-right: auto;
 
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
+	padding: 1.5% 3% 1.5% 3%;
 
-	padding: 2.5% 5% 2.5% 5%;
-
-	background-color: lavenderblush;
+	background-color: lavender;
 	border: 1px solid black;
 }
 
-#form-grid {
+.form-grid {
 	display: grid;
 	grid-template-columns: auto auto;
-	grid-template-rows: auto auto auto auto auto auto;
 
 	gap: 12px;
+	padding-bottom: 24px;
 }
 
 .input-prompt {
 	grid-column-start: 1;
 	grid-column-end: 1;
+
+	margin-top: auto;
+	margin-bottom: auto;
 } 
 
 #rooms {
 	resize: vertical;
 	min-height: 100px;
+}
+
+#rounds_min_max {
+	display: flex;
+	justify-content: space-between;
 }
 
 .centering-div {
