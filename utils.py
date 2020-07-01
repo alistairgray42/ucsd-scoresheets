@@ -2,7 +2,7 @@ def send_email(to, subj, body):
     from smtplib import SMTP_SSL
     from email.message import EmailMessage
     from creds import smtp_email, smtp_password
-    
+
     with SMTP_SSL("smtp.gmail.com") as s:
         s.login(smtp_email, smtp_password)
         e = EmailMessage()
@@ -29,7 +29,7 @@ def send_email_with_attachment(to, subj, body, filename, file_full_path):
     with SMTP_SSL("smtp.gmail.com") as s:
         s.login(smtp_email, smtp_password)
         s.sendmail(smtp_email, to, m.as_string())
-    
+
 
 def send_completion_email(to, sheet_id):
     msg = "You can find your aggregate scoresheet here:\n\nhttps://docs.google.com/spreadsheets/d/{}\n\nRemember to link all rooms from the aggregate scoresheet, and remember to link each room to the roster sheet (if you chose to use rosters)".format(sheet_id)
@@ -38,7 +38,7 @@ def send_completion_email(to, sheet_id):
 def send_conversion_email(to, sqbs_filename, sqbs_full_path):
     msg = "You can find your sqbs file here: http://localhost/sqbs/{} or attached to this email".format(sqbs_filename)
     send_email_with_attachment(to, "Your sqbs conversion is completed", msg, sqbs_filename, sqbs_full_path)
-    
+
 def generate_filename(s, ext, timestamp = None):
     from hashlib import md5
     return md5(bytes(s, "utf-8")).hexdigest()[:10] + ("_" + str(timestamp) if timestamp else "") + ext

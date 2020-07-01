@@ -1,0 +1,84 @@
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>Create an Aggregate Scoresheet</title>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="/static/style.css">
+	<script>
+		validateForm = (email, otp, rooms, num_rounds) => {
+			return true;
+		}
+		$(document).ready(() => {
+			$('input[type=radio][name=rosters]').change(() => {
+				if ($('input[type=radio][name=rosters]:checked').val() == 'Rosters') {
+					$("#roster_id").prop("disabled", false)
+				}
+				else {
+					$("#roster_id").prop("disabled", true)
+				}
+			});
+			$("#submit").click((e) => {
+				sheet = $("#sheet_id").val();
+				agg = $("#agg_id").val();
+				rosters = $('input[type=radio][name=rosters]:checked').val() == 'Rosters'
+				roster_id = $("#roster_id").val();
+				email = $("#email").val();
+				code = $("#access_code").val();
+				rooms = $("#rooms").val()
+				num_rounds = $("#num_rounds").val()
+				if (validateForm(sheet, agg, rosters, roster_id, email, code, rooms, num_rounds)) {
+					a = {};
+					a.sheet = sheet;
+					a.agg = agg;
+					a.rosters = rosters;
+					a.roster_id = roster_id;
+					a.email = email
+					a.code = code;
+					a.rooms = rooms;
+					a.num_rounds = num_rounds
+					$.get("/create/submit", a, (data) => {
+						if (data.error) {
+							alert(data.error);
+						}
+						else if (data.success) {
+							alert("Scoresheet generation request successful. If you do not receive an email at " + data.success + " within the next hour, please contact me")
+						}
+					}, "json");
+				}
+			})
+
+		});
+	</script>
+</head>
+
+<body>
+	{% include 'header.html' %}
+	<div id="wrapper">
+		<form>
+			<div id="form-grid">
+				<label class="input-prompt" for="tourney_name">Tournament name:</label>
+				<input type="text" id="tourney_name" placeholder="Tournament name" required>
+
+				<label class="input-prompt" for="email">Email:</label>
+				<input type="text" id="email" placeholder="Email" required>
+
+				<label class="input-prompt" for="bonus_tracking">Track bonus parts individually?</label>
+				<div class="centering-div">
+					<input type="checkbox" id="bonus_tracking">
+				</div>
+
+				<label class="input-prompt" for="rooms">List of rooms (max 35):</label>
+				<textarea id="rooms" placeholder="Rooms (one per line)"></textarea>
+			</div>
+
+			<div class="centering-div">
+				<input type="submit" id="submit" value="Submit">
+			</div>
+
+		</form>
+
+	</div>
+</body>
+
+</html>

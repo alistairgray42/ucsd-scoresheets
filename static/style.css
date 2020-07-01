@@ -1,104 +1,70 @@
-input{
-		font-family: Roboto, sans-serif;
-		color: #000;
-		font-size: 20px;
-		border-width: 0px 0px 3px 0px;
-		transition: border-color 0.3s;
-		border-color: #6d9cd6;
-		
-}
-input[type=text]{
-	width: 85%;
-	display:block;
-	margin-left:auto;
-	margin-right:auto;
-	background-color: #fafafa;
+/* fira-sans-regular - latin */
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Fira Sans Regular'), local('FiraSans-Regular'),
+       url('fonts/fira-sans-v10-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('fonts/fira-sans-v10-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
 }
 
-input[disabled]{
-	background-color:#d6d6d6;	
+* {
+	font-family: 'Fira Sans', sans-serif;
 }
 
-input:focus{
-	border-color:#335c8c;
-	transition: border-color 0.5s;
-	outline-color: transparent;
-	outline-style: none;
-	background-color:#fff;
 
+body {
+	background-color: aliceblue;
 }
 
-button{
-	border-radius: 5px;
-	background-color: #3e6da5;
-	border-style:none;
-	padding: 7px;
-	font-size:22px;
-	color: #fff;
-	width:auto;
-	transition: background-color 0.2s ease 0s, box-shadow 0.2s ease 0s;
-	display:block;
-	width:95%;
-	margin-left:auto;
-	margin-right:auto;
-	
-	
+#page-header{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+
+	padding-bottom: 2%;
 }
 
-button:hover{
-	background-color: #4c86c9;
-	transition: background-color 0.2s ease 0s, box-shadow 0.2s ease 0s;
-	box-shadow: 1px 1px 3px #888;
-	cursor:pointer;
+.header-row{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-evenly;
 }
 
-button:active{
-	background-color: #335c8c;
-	transition: background-color 0.08s;
-}
-textarea{
-font-family: Roboto, sans-serif;
-color: #000;
-font-size: 20px;
-width:85%;
-resize:none;
-border-width: 0px 0px 3px 0px;
-transition: border-color 0.3s;
-border-color: #6d9cd6;
-background-color: #fafafa;
-	display:block;
-	margin-left:auto;
-	margin-right:auto;
-}
-
-textarea:focus{
-	border-color:#335c8c;
-	transition: border-color 0.5s;
-	outline-color: transparent;
-	outline-style: none;
-	background-color:#fff;
-}
-input[type=number]::-webkit-outer-spin-button,
-input[type=number]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-input[type=number] {
-    -moz-appearance:textfield;
-	font-size:15px;
-}
-body{
-	background-color:#3f68aa;
-	font-family: Roboto, sans-serif;
-	
-}
 #wrapper{
-	background-color: #fcfcfc;
-	width: 75%;
+	max-width: 500px;
 	margin-left: auto;
-	margin-right:auto;
-	padding: 8px;
-	border-radius:4px;
-	
+	margin-right: auto;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+
+	padding: 2.5% 5% 2.5% 5%;
+
+	background-color: lavenderblush;
+	border: 1px solid black;
+}
+
+#form-grid {
+	display: grid;
+	grid-template-columns: auto auto;
+	grid-template-rows: auto auto auto auto auto auto;
+
+	gap: 12px;
+}
+
+.input-prompt {
+	grid-column-start: 1;
+	grid-column-end: 1;
+} 
+
+#rooms {
+	resize: vertical;
+	min-height: 100px;
+}
+
+.centering-div {
+	display: flex;
+	justify-content: center;
 }
