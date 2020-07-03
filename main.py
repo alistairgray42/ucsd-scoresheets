@@ -9,7 +9,7 @@ from subprocess import Popen
 from hashlib import md5
 from smtplib import SMTP_SSL
 
-from flask import Flask, request, send_from_directory, render_template
+from flask import Flask, request, send_from_directory, render_template, jsonify
 #from flask.ext.compress import Compress
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -47,17 +47,21 @@ def schedule_generation():
     global last_epoch_start
     global api_calls_from_last
     global api_calls_in_epoch
+
     if(int(time.time()) - last_epoch_start > EPOCH_LENGTH):
         api_calls_in_epoch = 0
         last_epoch_start = int(time.time())
+
     for i in range(len(queue)):
         (filename, num_api_calls) = queue[i]
         if(api_calls_in_epoch + num_api_calls < API_LIMIT):
             api_calls_in_epoch += num_api_calls
             api_calls_from_last = num_api_calls
             queue.pop(i)
+
             print("running:", filename, os.path.join(
                 "generation_configs", filename))
+
             Popen([sys.executable, "scoresheetgen_with_rosters.py",
                    os.path.join("generation_configs", filename)])
             break
@@ -76,24 +80,15 @@ def schedule_sqbs_conversion():
 def validate_create_args(args):
     global counter
     err_dict = {
-        "code": "Invalid access code",
-        "sheet": "Invalid ID or url for master scoresheet",
-        "agg": "Invalid ID or url for master aggregate sheet",
-        "roster_id": "Invalid ID or url for roster sheet",
-        "rooms": "Invalid number of rooms. Valid range: 1-{}".format(MAX_ROOMS),
-        "num_rounds": "Invalid number of rounds. Valid range: 1-{}".format(MAX_ROUNDS),
+        "missing": "Invalid: missing ",
         "email": "Invalid email",
+        "rooms": "Invalid number of rooms. Valid range: 1-{}".format(MAX_ROOMS),
         "duplicate_room_names": "You have a duplicate room name"
     }
 
-    for key in ["sheet", "agg", "roster_id"]:
-        if(key == "roster_id" and args["rosters"] != "true"):
-            continue
-        match = validate_spreadsheet(args[key])
-        if(match):
-            args[key] = match
-        else:
-            return {"error": err_dict[key]}
+    for check_var in ("tourney_name", "email", "rooms"):
+        if check_var not in args:
+            return {"error": err_dict["missing"] + check_var}
 
     if(args["rooms"].count(",") > 0):
         args["rooms"] = [i.strip()[:25]
@@ -101,12 +96,14 @@ def validate_create_args(args):
     else:
         args["rooms"] = [i.strip()[:25]
                          for i in args["rooms"].split("\n") if len(i.strip()) > 0]
+
     if(len(set(args["rooms"])) != len(args["rooms"])):
         return {"error": err_dict["duplicate_room_names"]}
 
     if(len(args["rooms"]) > MAX_ROOMS or len(args["rooms"]) <= 0):
         return {"error": err_dict["rooms"]}
 
+    # sketchy but whatever
     email_match = re.match(
         r'([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)', args["email"])
     if(not email_match or len(email_match.groups()[0]) > MAX_EMAIL_LENGTH):
@@ -114,17 +111,6 @@ def validate_create_args(args):
     else:
         args["email"] = email_match.groups()[0]
 
-    try:
-        args["num_rounds"] = int(args["num_rounds"])
-        assert args["num_rounds"] <= MAX_ROUNDS and args["num_rounds"] > 0
-    except:
-        return {"error": err_dict["num_rounds"]}
-
-    if(args["code"] == hotp.at(counter)):
-        counter += 1
-        print("good", hotp.at(counter))
-    else:
-        return {"error": err_dict["code"]}
     return False
 
 
@@ -189,17 +175,24 @@ def create():
     global last_epoch_start
     req = dict((i, j.strip())
                for i, j in zip(request.args.keys(), request.args.values()))
-    invalid = validate_create_args(req)
-    if(invalid):
-        return json.dumps(invalid)
-    filename = generate_filename(req["sheet"], ".json")
+
+    try:
+        invalid = validate_create_args(req)
+
+        if(invalid):
+            return jsonify(invalid)
+    except Exception as e:
+        print(repr(e))
+        return {"error": "Invalid arguments"}
+
+    filename = generate_filename(req["email"], ".json")
     with open(os.path.join("generation_configs", filename), "w") as f:
         json.dump(req, f)
+
     if(len(queue) == 0):
         last_epoch_start = int(time.time())
-    queue.append((filename, len(req["rooms"]) *
-                  (2 if req["rosters"] == "true" else 0) + 1))
-    return json.dumps({"success": req["email"]})
+    queue.append((filename, len(req["rooms"]) * 2 + 1))
+    return {"success": req["email"]}
 
 
 @app.route("/convert")
