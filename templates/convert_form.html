@@ -1,4 +1,4 @@
-<html>
+<html lang="en">
 
 <head>
 	<meta charset="utf-8">
@@ -7,21 +7,13 @@
 	<link rel="stylesheet" type="text/css" href="/static/style.css">
 	<script>
 		$(document).ready(() => {
-			$("#submit").click((e) => {
-				agg = $("#agg_id").val();
-				email = $("#email").val();
-				num_rounds = $("#num_rounds").val()
-				num_rooms = $("#num_rooms").val()
-				powers = $('input[type=radio][name=powers]:checked').val() == 'powers'
-				divisions = $('input[type=radio][name=divisions]:checked').val() == 'divisions'
+			$("#convert_form").submit((e) => {
 
-				a = {};
-				a.agg = agg;
-				a.email = email;
-				a.num_rounds = num_rounds;
-				a.num_rooms = num_rooms;
-				a.powers = powers;
-				a.divisions = divisions;
+				a = {
+					"email": $("#email").val(),
+					"rounds_min": $("#rounds_min").val(),
+					"rounds_max": $("#rounds_max").val()
+				};
 
 				$.get("/convert/submit", a, (data) => {
 					if (data.error) {
@@ -71,7 +63,7 @@
 		</ul>
 		</p>
 
-		<form>
+		<form id="convert-form">
 			<div class="form-grid">
 				<label class="input-prompt" for="email">Email:</label>
 				<input type="email" id="email" placeholder="Email" required>
