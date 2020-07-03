@@ -5,8 +5,13 @@
 # Secrets
 
 client_secrets.json
-creds.py
 drive.json
+
+# let's not share our email and password
+creds.py
+
+# let's also not share anyone else's
+generation_configs/*
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,django,visualstudiocode,vim,react
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,django,visualstudiocode,vim,react
