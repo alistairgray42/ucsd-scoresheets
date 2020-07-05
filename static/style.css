@@ -13,8 +13,36 @@
 }
 
 
+a {
+	color: #25252c;
+	text-decoration: underline;
+}
+
+a:hover {
+	color: #ec5d57;
+}
+
+#submit {
+	margin-top: 1.5em;
+
+	background-color: #8b5dbb;
+	color: white;
+	padding: 0.6em 5em;
+	border: 1px solid black;
+	border-radius: 8px;
+
+	font-weight: 900;
+	font-size: 14px;
+
+}
+
+#submit:hover {
+	background-color: #ec5d57;
+}
+
+
 body {
-	background-color: aliceblue;
+	background-color: #cec0eb;
 }
 
 li {
@@ -28,8 +56,9 @@ li {
 	margin-bottom: 1.5%;
 	padding: 1.5% 3% 1.5% 3%;
 
-	background-color: rgb(180, 233, 180);
+	background-color: #e7dff7;
 	border: 1px solid black;
+	border-radius: 8px;
 
 	max-width: 600px;
 }
@@ -48,8 +77,10 @@ li {
 
 	padding: 1.5% 3% 1.5% 3%;
 
-	background-color: lavender;
+	background-color: #e7dff7;
+
 	border: 1px solid black;
+	border-radius: 8px;
 }
 
 .form-grid {
@@ -60,17 +91,21 @@ li {
 	padding-bottom: 24px;
 }
 
-.input-prompt {
+.input-prompt :not(#bonus_tracking) {
 	grid-column-start: 1;
 	grid-column-end: 1;
 
-	margin-top: auto;
-	margin-bottom: auto;
+	align-self: center;
 } 
 
 #rooms {
 	resize: vertical;
 	min-height: 100px;
+
+	border-radius: 5px;
+	box-shadow: none;
+	border: 1px solid lightgray;
+	padding: 5px;
 }
 
 #rounds_min_max {
@@ -81,4 +116,13 @@ li {
 .centering-div {
 	display: flex;
 	justify-content: center;
+}
+
+#bonus_tracking {
+	align-self: start;
+}
+
+#title {
+	font-weight: 900;
+	color: black;
 }
