@@ -10,15 +10,15 @@ from hashlib import md5
 from smtplib import SMTP_SSL
 
 from flask import Flask, request, send_from_directory, render_template, jsonify
-#from flask.ext.compress import Compress
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
 import pyotp
 
-from utils import *
 from creds import *
+from utils import *
+from scoresheetgen import generate_from_file
 
 GENERATION_SCHEDULE_INTERVAL = 15
 CONVERSION_SCHEDULE_INTERVAL = 15
@@ -31,10 +31,6 @@ CONVERSION_REPEAT_DELAY = 5
 api_calls_in_epoch = 0
 api_calls_from_last = 0
 last_epoch_start = int(time.time())
-
-otp_seed = os.urandom(12)
-hotp = pyotp.HOTP(base64.b32encode(otp_seed).decode("utf-8"))
-counter = 0
 
 app = Flask("Scoresheet Generator")
 
@@ -59,11 +55,11 @@ def schedule_generation():
             api_calls_from_last = num_api_calls
             queue.pop(i)
 
-            print("running:", filename, os.path.join(
-                "generation_configs", filename))
+            print("running:", filename, os.path.join("generation_configs", filename))
+            generate_from_file(os.path.join("generation_configs", filename))
+            print("completed:", filename, os.path.join("generation_configs", filename))
 
-            Popen([sys.executable, "scoresheetgen_with_rosters.py",
-                   os.path.join("generation_configs", filename)])
+            # Popen([sys.executable, "scoresheetgen_with_rosters.py", os.path.join("generation_configs", filename)])
             break
 
 
@@ -74,10 +70,9 @@ def schedule_sqbs_conversion():
         Popen([sys.executable, "convert_to_sqbs.py", filename, str(
             rooms), str(rounds), str(powers), str(divisions)])
 
-# will modify in place
-
 
 def validate_create_args(args):
+    # will modify in place
     global counter
     err_dict = {
         "missing": "Invalid: missing ",
@@ -192,6 +187,9 @@ def create():
     if(len(queue) == 0):
         last_epoch_start = int(time.time())
     queue.append((filename, len(req["rooms"]) * 2 + 1))
+
+    print(f"adding submit config for {req['email']}")
+
     return {"success": req["email"]}
 
 
@@ -242,7 +240,7 @@ scheduler.add_job(func=schedule_generation, trigger=IntervalTrigger(
 scheduler.add_job(func=schedule_sqbs_conversion, trigger=IntervalTrigger(
     seconds=GENERATION_SCHEDULE_INTERVAL), replace_existing=True)
 atexit.register(lambda: scheduler.shutdown())
+
 if __name__ == '__main__':
-    print(hotp.at(counter))
-    # app.run("0.0.0.0", 8080)
+    # app must block or scheduler will not work in the background; i.e. run this instead of "python -m flask run"
     app.run()

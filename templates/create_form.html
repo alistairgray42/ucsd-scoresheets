@@ -15,12 +15,11 @@
 						alert(data.error);
 					}
 					else if (data.success) {
-						alert("Scoresheet generation request successful. If you do not receive an email at " + data.success + " within the next hour, please contact me")
-					}
-					else {
-						alert("otherwise");
+						alert("Scoresheet generation request successful. If you do not receive an email at " + data.success + " within the next hour, please contact me");
+						window.location.href = "/";
 					}
 				});
+
 			})
 
 		});

@@ -312,14 +312,16 @@ class ScoresheetGenerator:
                        "last_run": 0}, f)
 
 
-j = json.load(open(sys.argv[1], 'r'))
-sg = ScoresheetGenerator(
-    checkboxes=(j["bonus_tracking"] == "on"),
-    tournament_name=j["tourney_name"],
-    email=j["email"],
-    room_names=j["rooms"])
+def generate_from_file(filename):
+    with open(filename, 'r') as f:
+        j = json.load(f)
 
-sg.generate()
-sg.share_with_recipient()
-sg.write_config()
-# send_completion_email(sg.email, sg.aggregate_id)
+        sg = ScoresheetGenerator(
+            checkboxes=(j["bonus_tracking"] == "on"),
+            tournament_name=j["tourney_name"],
+            email=j["email"],
+            room_names=j["rooms"])
+
+        sg.generate()
+        sg.share_with_recipient()
+        sg.write_config()
