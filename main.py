@@ -73,18 +73,20 @@ def schedule_sqbs_conversion():
 
 def validate_create_args(args):
     # will modify in place
-    global counter
     err_dict = {
         "missing": "Invalid: missing ",
         "email": "Invalid email",
+        "unauthorized": "Your email isn't authorized to use with the system",
         "rooms": "Invalid number of rooms. Valid range: 1-{}".format(MAX_ROOMS),
         "duplicate_room_names": "You have a duplicate room name"
     }
 
+    # check if any required arguments aren't present (after client-side validation)
     for check_var in ("tourney_name", "email", "rooms"):
         if check_var not in args:
             return {"error": err_dict["missing"] + check_var}
 
+    # check there are enough rooms and they're unique
     if(args["rooms"].count(",") > 0):
         args["rooms"] = [i.strip()[:25]
                          for i in args["rooms"].split(",") if len(i.strip()) > 0]
@@ -98,13 +100,18 @@ def validate_create_args(args):
     if(len(args["rooms"]) > MAX_ROOMS or len(args["rooms"]) <= 0):
         return {"error": err_dict["rooms"]}
 
-    # sketchy but whatever
+    # sketchy email validation but whatever
     email_match = re.match(
         r'([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)', args["email"])
     if(not email_match or len(email_match.groups()[0]) > MAX_EMAIL_LENGTH):
         return {"error": err_dict["email"]}
     else:
         args["email"] = email_match.groups()[0]
+
+    # check if email is authorized
+
+    if not authorize_email(args["email"]):
+        return {"error": err_dict["unauthorized"]}
 
     return False
 
