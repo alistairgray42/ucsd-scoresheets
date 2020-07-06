@@ -39,7 +39,7 @@ def send_completion_email(to, sheet_id):
 
 
 def send_conversion_email(to, sqbs_filename, sqbs_full_path):
-    msg = "Your SQBS conversion is attached!".format(sqbs_filename)
+    msg = "Your SQBS conversion is attached!"
     send_email_with_attachment(to, "SQBS conversion complete", msg, sqbs_filename, sqbs_full_path)
 
 
