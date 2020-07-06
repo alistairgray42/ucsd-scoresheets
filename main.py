@@ -65,10 +65,10 @@ def schedule_generation():
 
 def schedule_sqbs_conversion():
     if(len(sqbs_queue) > 0):
-        filename, rounds, rooms, powers, divisions = sqbs_queue.pop(0)
+        filename, round_min, round_max = sqbs_queue.pop(0)
+
         print("converting:", filename)
-        Popen([sys.executable, "convert_to_sqbs.py", filename, str(
-            rooms), str(rounds), str(powers), str(divisions)])
+        Popen([sys.executable, "convert_to_sqbs.py", filename, round_min, round_max])
 
 
 def validate_create_args(args):
@@ -117,36 +117,43 @@ def validate_create_args(args):
 
 
 def validate_convert_args(args):
-    global counter
     err_dict = {
-        "agg": "Invalid ID or url for master aggregate sheet. Or you may not have chosen to use rosters",
-        "email": "Invalid email",
-        "num_rounds": "Invalid number of rounds",
-        "num_rooms": "Invalid number of rooms"
+        "missing": "Error: Missing variable ",
+        "email": "Error: Invalid email",
+        "rounds_min": "Error: First round number invalid",
+        "rounds_max": "Error: Last round number invalid",
+        "min_lt_max": "Error: First round number must be <= Last round number"
     }
-    email_match = re.match(
-        r'([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)', args["email"])
-    if(not email_match or len(email_match.groups()[0]) > MAX_EMAIL_LENGTH):
+
+    # check if any required arguments aren't present (after client-side validation)
+    for check_var in ("email", "rounds_min", "round_max"):
+        if check_var not in args:
+            return {"error": err_dict["missing"] + check_var}
+
+    # validate against pre-approved emails
+    if(not authorize_email(args["email"])):
         return {"error": err_dict["email"]}
-    else:
-        args["email"] = email_match.groups()[0]
+
+    # check round min and round max are integers, in the correct range, and min < max
+    try:
+        args["rounds_min"] = int(args["rounds_min"])
+        assert args["rounds_min"] <= MAX_ROUNDS and args["rounds_min"] > 0
+    except:
+        return {"error": err_dict["rounds_min"]}
+    try:
+        args["rounds_max"] = int(args["rounds_max"])
+        assert args["rounds_max"] <= MAX_ROOMS and args["rounds_max"] > 0
+    except:
+        return {"error": err_dict["rounds_max"]}
 
     try:
-        args["num_rounds"] = int(args["num_rounds"])
-        assert args["num_rounds"] <= MAX_ROUNDS and args["num_rounds"] > 0
+        assert args["rounds_min"] <= args["rounds_max"]
     except:
-        return {"error": err_dict["num_rounds"]}
-    try:
-        args["num_rooms"] = int(args["num_rooms"])
-        assert args["num_rooms"] <= MAX_ROOMS and args["num_rooms"] > 0
-    except:
-        return {"error": err_dict["num_rooms"]}
+        return {"error": err_dict["min_lt_max"]}
 
-    match = validate_spreadsheet(args["agg"])
-    if(match):
-        if (os.path.isfile(os.path.join("sqbs_configs", generate_filename(match, ".json")))):
-            args["agg"] = match
-            return False
+    # if user has created sheets before, there'll be a sqbs config for it
+    if (os.path.isfile(os.path.join("sqbs_configs", generate_filename(args["email"], ".json")))):
+        return False
 
     return {"error": err_dict["agg"]}
 
@@ -207,28 +214,27 @@ def convert_index():
 
 @app.route("/convert/submit")
 def convert():
-    req = dict((i, j.strip())
-               for i, j in zip(request.args.keys(), request.args.values()))
+    req = dict((i, j.strip()) for i, j in zip(request.args.keys(), request.args.values()))
+
     invalid = validate_convert_args(req)
     if(invalid):
         return json.dumps(invalid)
-    file = os.path.join("sqbs_configs", generate_filename(req["agg"], ".json"))
+
+    file = os.path.join("sqbs_configs", generate_filename(req["email"], ".json"))
+
     d = {}
     with open(file) as f:
         d = json.load(f)
+
     if(int(time.time()) - d["last_run"] < CONVERSION_REPEAT_DELAY):
         return json.dumps({"error": "Please wait at least {} seconds in between submitting sqbs conversion jobs".format(CONVERSION_REPEAT_DELAY + CONVERSION_SCHEDULE_INTERVAL)})
-    powers = int(req["powers"] == "true")
-    divisions = int(req["divisions"] == "true")
-    duplicate = False
-    for item in queue:
+
+    for item in sqbs_queue:
         if(item[0] == file):
-            duplicate = True
-    if (duplicate):
-        return json.dumps({"error": "You already have a job request for that aggregate sheet"})
+            return json.dumps({"error": "You already have a job request for that aggregate sheet"})
+
     else:
-        sqbs_queue.append(
-            (file, req["num_rounds"], req["num_rooms"], powers, divisions))
+        sqbs_queue.append((file, req["rounds_min"], req["rounds_max"]))
         with open(file, "w") as f:
             d["email"] = req["email"]
             json.dump(d, f)

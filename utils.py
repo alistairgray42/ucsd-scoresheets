@@ -39,11 +39,11 @@ def send_completion_email(to, sheet_id):
 
 
 def send_conversion_email(to, sqbs_filename, sqbs_full_path):
-    msg = "You can find your sqbs file here: http://localhost/sqbs/{} or attached to this email".format(sqbs_filename)
-    send_email_with_attachment(to, "Your sqbs conversion is completed", msg, sqbs_filename, sqbs_full_path)
+    msg = "Your SQBS conversion is attached!".format(sqbs_filename)
+    send_email_with_attachment(to, "SQBS conversion complete", msg, sqbs_filename, sqbs_full_path)
 
 
-def generate_filename(s, ext, timestamp=None):
+def generate_filename(s, ext="", timestamp=None):
     from hashlib import md5
     return md5(bytes(s, "utf-8")).hexdigest()[:10] + ("_" + str(timestamp) if timestamp else "") + ext
 
