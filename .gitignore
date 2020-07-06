@@ -17,6 +17,11 @@ sheets/*
 sqbs_files/*
 database.db
 
+# by request, not sharing SQBS conversion code
+convert_to_sqbs.py
+rosters.py
+sqbs_utils.py
+
 # Created by https://www.toptal.com/developers/gitignore/api/python,django,visualstudiocode,vim,react
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,django,visualstudiocode,vim,react
 
