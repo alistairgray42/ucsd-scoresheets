@@ -8,21 +8,16 @@
 	<script>
 		$(document).ready(() => {
 			$("#convert_form").submit((e) => {
+				e.preventDefault();
 
-				a = {
-					"email": $("#email").val(),
-					"rounds_min": $("#rounds_min").val(),
-					"rounds_max": $("#rounds_max").val()
-				};
-
-				$.get("/convert/submit", a, (data) => {
+				$.getJSON("/convert/submit", $("#create-form").serialize(), (data) => {
 					if (data.error) {
 						alert(data.error);
 					}
 					else if (data.success) {
 						alert("Scoresheet generation request successful. If you do not receive an email at " + data.success + " within the next hour, please contact me")
 					}
-				}, "json");
+				});
 
 			})
 

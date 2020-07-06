@@ -87,6 +87,8 @@ li {
 	display: grid;
 	grid-template-columns: auto auto;
 
+	align-items: center;
+
 	gap: 12px;
 	padding-bottom: 24px;
 }
@@ -101,11 +103,15 @@ li {
 #rooms {
 	resize: vertical;
 	min-height: 100px;
+}
 
+#rooms, #tourney_name, #email {
 	border-radius: 5px;
 	box-shadow: none;
 	border: 1px solid lightgray;
 	padding: 5px;
+
+	font-size: 14px;
 }
 
 #rounds_min_max {
@@ -116,10 +122,6 @@ li {
 .centering-div {
 	display: flex;
 	justify-content: center;
-}
-
-#bonus_tracking {
-	align-self: start;
 }
 
 #title {
