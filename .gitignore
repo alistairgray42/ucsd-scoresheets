@@ -13,6 +13,8 @@ creds.py
 # let's also not share anyone else's data
 generation_configs/*
 sqbs_configs/*
+sheets/*
+sqbs_files/*
 database.db
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,django,visualstudiocode,vim,react
