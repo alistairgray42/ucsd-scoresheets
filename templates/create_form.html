@@ -29,13 +29,24 @@
 <body>
 	{% include 'header.html' %}
 	<div id="wrapper">
+
+		<h1>
+			Create Scoresheets
+		</h1>
+
+		<p>
+			This form allows you to create sets of UCSD Scoresheets. <b>You cannot create scoresheets unless I approve
+				your email address</b> - due to Google's API limits, I don't plan to open this functionality to the
+			general public.
+		</p>
+
 		<form id="create-form">
 			<div class="form-grid">
 				<label class="input-prompt" for="tourney_name">Tournament name:</label>
 				<input type="text" name="tourney_name" id="tourney_name" placeholder="Tournament name" required>
 
 				<label class="input-prompt" for="email">Email:</label>
-				<input type="email" name="email" id="email" placeholder="Email" required vali>
+				<input type="email" name="email" id="email" placeholder="Email" required>
 
 				<label class="input-prompt" for="bonus_tracking">Track bonus parts individually?</label>
 				<input type="checkbox" name="bonus_tracking" id="bonus_tracking">
