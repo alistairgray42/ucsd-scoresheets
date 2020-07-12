@@ -1,12 +1,21 @@
+import re
+import sqlite3
+from email.message import EmailMessage
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from hashlib import md5
+from smtplib import SMTP_SSL
+
+from creds import smtp_email, smtp_password
+
+
 def send_email(to, subj, body):
-    from smtplib import SMTP_SSL
-    from email.message import EmailMessage
-    from creds import smtp_email, smtp_password
 
     with SMTP_SSL("smtp.gmail.com") as s:
         s.login(smtp_email, smtp_password)
         e = EmailMessage()
-        if(subj):
+        if subj:
             e["Subject"] = subj
         e["To"] = to
         e["From"] = smtp_email
@@ -15,11 +24,6 @@ def send_email(to, subj, body):
 
 
 def send_email_with_attachment(to, subj, body, filename, file_full_path):
-    from smtplib import SMTP_SSL
-    from email.mime.multipart import MIMEMultipart
-    from email.mime.text import MIMEText
-    from email.mime.application import MIMEApplication
-    from creds import smtp_email, smtp_password
     t = MIMEText(body)
     f = MIMEApplication(open(file_full_path).read())
     f.add_header('Content-Disposition', 'attachment', filename=filename)
@@ -44,29 +48,25 @@ def send_conversion_email(to, sqbs_filename, sqbs_full_path):
 
 
 def generate_filename(s, ext="", timestamp=None):
-    from hashlib import md5
     return md5(bytes(s, "utf-8")).hexdigest()[:10] + ("_" + str(timestamp) if timestamp else "") + ext
 
 
 def validate_spreadsheet(s):
-    import re
     url_match = re.search(r'/spreadsheets/d/([a-zA-Z0-9-_]+)', s)
     id_match = re.match(r'(^[a-zA-Z0-9-_]+$)', s)
     match = ""
-    if(url_match):
+    if url_match:
         match = url_match.groups()[0]
-    elif(id_match):
+    elif id_match:
         match = id_match.groups()[0]
-    if(len(match) > 20 and len(match) < 80):
+    if len(match) > 20 and len(match) < 80:
         return match
     return None
 
 
 def authorize_email(email):
-    import sqlite3
-
     connection = sqlite3.connect('database.db')
-    cursor = connection.cursor
+    cursor = connection.cursor()
 
-    cursor.execute("SELECT COUNT(*) FROM emails WHERE email = % LIMIT 1", email)
+    cursor.execute("SELECT COUNT(*) FROM emails WHERE email = ? LIMIT 1", (email,))
     return int(cursor.fetchone()) == 1

@@ -7,10 +7,11 @@
 	<link rel="stylesheet" type="text/css" href="/static/style.css">
 	<script>
 		$(document).ready(() => {
-			$("#convert_form").submit((e) => {
+			$("#convert-form").submit((e) => {
+
 				e.preventDefault();
 
-				$.getJSON("/convert/submit", $("#create-form").serialize(), (data) => {
+				$.getJSON("/convert/submit", $("#convert-form").serialize(), (data) => {
 					if (data.error) {
 						alert(data.error);
 					}
@@ -64,13 +65,14 @@
 		<form id="convert-form">
 			<div class="form-grid">
 				<label class="input-prompt" for="email">Email:</label>
-				<input type="email" id="email" placeholder="Email" required>
+				<input type="email" id="email" name="email" placeholder="Email" required>
 
 				<label class="input-prompt">Rounds to Convert:</label>
 
 				<div id="rounds_min_max">
-					<input type="number" id="rounds_min" placeholder="Start" min="1" max="16" required>
-					<input type="number" id="rounds_max" placeholder="End" min="1" max="16" required>
+					<input type="number" id="rounds_min" name="rounds_min" placeholder="Start" min="1" max="16"
+						required>
+					<input type="number" id="rounds_max" name="rounds_max" placeholder="End" min="1" max="16" required>
 				</div>
 			</div>
 
