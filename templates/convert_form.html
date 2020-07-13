@@ -3,8 +3,10 @@
 <head>
 	<meta charset="utf-8">
 	<title>UCSD Scoresheets | Convert</title>
-	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="/static/style.css">
+
+	<script src="../static/error-success.js"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 	<script>
 		$(document).ready(() => {
 			$("#convert-form").submit((e) => {
@@ -13,10 +15,12 @@
 
 				$.getJSON("/convert/submit", $("#convert-form").serialize(), (data) => {
 					if (data.error) {
-						alert(data.error);
+						setSuccess("");
+						setError("Error: " + data.error);
 					}
 					else if (data.success) {
-						alert("Scoresheet generation request successful. If you do not receive an email at " + data.success + " within the next hour, please contact me")
+						setError("");
+						setSuccess("Conversion request successful. You should soon receive an email at " + data.success + " with your SQBS file.");
 					}
 				});
 
@@ -61,6 +65,9 @@
 				only convert the last-created set of scoresheets. </li>
 		</ul>
 		</p>
+
+		<div id="error"> </div>
+		<div id="success"> </div>
 
 		<form id="convert-form">
 			<div class="form-grid">

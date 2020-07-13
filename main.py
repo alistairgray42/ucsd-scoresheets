@@ -75,17 +75,17 @@ def schedule_sqbs_conversion():
 def validate_create_args(args):
     # will modify in place
     err_dict = {
-        "missing": "Invalid: missing ",
-        "email": "Invalid email",
-        "unauthorized": "Your email isn't authorized to use with the system",
-        "rooms": "Invalid number of rooms. Valid range: 1-{}".format(MAX_ROOMS),
-        "duplicate_room_names": "You have a duplicate room name"
+        "missing": "Missing {}.",
+        "email": "Invalid email.",
+        "unauthorized": "Your email isn't authorized! Please contact Alistair if you're directing a (legitimate) tournament and would like to be authorized.",
+        "rooms": "Invalid number of rooms. You may have between 1 and {} rooms.".format(MAX_ROOMS),
+        "duplicate_room_names": "You have a duplicate room name."
     }
 
     # check if any required arguments aren't present (after client-side validation)
     for check_var in ("tourney_name", "email", "rooms"):
         if check_var not in args:
-            return {"error": err_dict["missing"] + check_var}
+            return {"error": err_dict["missing"].format(check_var)}
 
     # check there are enough rooms and they're unique
     if args["rooms"].count(",") > 0:
@@ -119,17 +119,17 @@ def validate_create_args(args):
 
 def validate_convert_args(args):
     err_dict = {
-        "missing": "Error: Missing variable ",
-        "email": "Error: Invalid email",
-        "rounds_min": "Error: First round number invalid",
-        "rounds_max": "Error: Last round number invalid",
-        "min_lt_max": "Error: First round number must be <= Last round number"
+        "missing": "Missing {}.",
+        "unauthorized": "Your email is invalid or unauthorized! Make sure this is the same email you used to create your scoresheet.",
+        "rounds_min": "First round number invalid - it must be a number no greater than {}.".format(MAX_ROUNDS),
+        "rounds_max": "Last round number invalid - it must be a number no greater than {}.".format(MAX_ROUNDS),
+        "min_lt_max": "First round number can't be greater than last round number."
     }
 
     # check if any required arguments aren't present (after client-side validation)
     for check_var in ("email", "rounds_min", "round_max"):
         if check_var not in args:
-            return {"error": err_dict["missing"] + check_var}
+            return {"error": err_dict["missing"].format(check_var)}
 
     # validate against pre-approved emails
     if not authorize_email(args["email"]):
@@ -159,11 +159,6 @@ def validate_convert_args(args):
     return {"error": err_dict["agg"]}
 
 
-@app.route("/static/<path:filename>")
-def serve_static(filename):
-    return send_from_directory("static", filename)
-
-
 @app.route("/")
 def serve_index():
     return render_template("info.html")
@@ -176,7 +171,6 @@ def serve_about():
 
 @app.route("/create")
 def create_index():
-    # return serve_static("create_form.html")
     return render_template("create_form.html")
 
 
@@ -185,6 +179,11 @@ def create():
     global last_epoch_start
     req = dict((i, j.strip())
                for i, j in zip(request.args.keys(), request.args.values()))
+
+    invalid = validate_create_args(req)
+
+    if invalid:
+        return jsonify(invalid)
 
     try:
         invalid = validate_create_args(req)
@@ -257,6 +256,7 @@ scheduler.add_job(func=schedule_sqbs_conversion, trigger=IntervalTrigger(
 atexit.register(scheduler.shutdown)
 
 if __name__ == '__main__':
-    # app must block or scheduler will not work in the background; i.e. run this instead of "python -m flask run"
+    # app must block or scheduler will not work in the background; i.e. run this file to actually run jobs
+    # alternatively, run using "FLASK_APP=main.py venv/bin/python -m flask run" to not run jobs
     log.info("Starting up")
     app.run(host="0.0.0.0")

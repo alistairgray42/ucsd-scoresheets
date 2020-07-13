@@ -69,4 +69,4 @@ def authorize_email(email):
     cursor = connection.cursor()
 
     cursor.execute("SELECT COUNT(*) FROM emails WHERE email = ? LIMIT 1", (email,))
-    return int(cursor.fetchone()) == 1
+    return int(cursor.fetchone()[0]) != 0

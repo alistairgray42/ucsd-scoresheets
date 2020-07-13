@@ -3,8 +3,10 @@
 <head>
 	<meta charset="utf-8">
 	<title>UCSD Scoresheets | Create</title>
-	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="/static/style.css">
+
+	<script src="../static/error-success.js"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 	<script>
 		$(document).ready(() => {
 			$("#create-form").submit((e) => {
@@ -12,11 +14,12 @@
 
 				$.getJSON("/create/submit", $("#create-form").serialize(), (data) => {
 					if (data.error) {
-						alert(data.error);
+						setSuccess("");
+						setError("Error: " + data.error);
 					}
 					else if (data.success) {
-						alert("Scoresheet generation request successful. If you do not receive an email at " + data.success + " within the next hour, please contact me");
-						window.location.href = "/";
+						setError("");
+						setSuccess("Scoresheet generation request successful. If you do not receive an email at " + data.success + " within the next hour, please contact me.");
 					}
 				});
 
@@ -39,6 +42,9 @@
 				your email address</b> - due to Google's API limits, I don't plan to open this functionality to the
 			general public.
 		</p>
+
+		<div id="error"> </div>
+		<div id="success"> </div>
 
 		<form id="create-form">
 			<div class="form-grid">
