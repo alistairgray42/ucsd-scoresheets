@@ -1,5 +1,5 @@
 setError = function (message) {
-    if (error) {
+    if (message) {
         $("#error").text(message);
         $("#error").show();
     }

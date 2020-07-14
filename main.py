@@ -88,7 +88,9 @@ def validate_create_args(args):
             return {"error": err_dict["missing"].format(check_var)}
 
     # check there are enough rooms and they're unique
-    if args["rooms"].count(",") > 0:
+    if isinstance(args["rooms"], list):
+        args["rooms"] = [i.strip()[:25] for i in args["rooms"] if len(i) > 0]
+    elif args["rooms"].count(",") > 0:
         args["rooms"] = [i.strip()[:25]
                          for i in args["rooms"].split(",") if len(i.strip()) > 0]
     else:
