@@ -323,7 +323,7 @@ def generate_from_file(filename):
         j = json.load(f)
 
         sg = ScoresheetGenerator(
-            checkboxes=(j["bonus_tracking"] == "on"),
+            checkboxes=("bonus_tracking" in j and j["bonus_tracking"] == "on"),
             tournament_name=j["tourney_name"],
             email=j["email"],
             room_names=j["rooms"])
