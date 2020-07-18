@@ -1,6 +1,3 @@
-# Personalized
-
-.vscode/settings.json
 
 # Secrets
 
@@ -22,9 +19,10 @@ convert_to_sqbs.py
 rosters.py
 sqbs_utils.py
 
-# also these other things
+# also these other things aren't necessary
 
 .idea/
+.vscode/
 __pycache__/ 
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,django,visualstudiocode,vim,react
