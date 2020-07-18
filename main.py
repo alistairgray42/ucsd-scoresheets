@@ -13,6 +13,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from flask import Flask, jsonify, render_template, request, send_from_directory
 
 from scoresheetgen import generate_from_file
+from convert_to_sqbs import convert_to_sqbs
 from utils import authorize_email, generate_filename
 
 GENERATION_SCHEDULE_INTERVAL = 15
@@ -68,7 +69,7 @@ def schedule_sqbs_conversion():
         filename, round_min, round_max = sqbs_queue.pop(0)
 
         log.info(f"[{filename}] -- Running SQBS job")
-        Popen([sys.executable, "convert_to_sqbs.py", filename, round_min, round_max])
+        convert_to_sqbs(filename, round_min, round_max)
         log.info(f"[{filename}] -- Finished running SQBS job")
 
 
@@ -129,7 +130,7 @@ def validate_convert_args(args):
     }
 
     # check if any required arguments aren't present (after client-side validation)
-    for check_var in ("email", "rounds_min", "round_max"):
+    for check_var in ("email", "rounds_min", "rounds_max"):
         if check_var not in args:
             return {"error": err_dict["missing"].format(check_var)}
 
@@ -223,25 +224,28 @@ def convert():
         return json.dumps(invalid)
 
     filename = generate_filename(req["email"], ".json")
-    file = os.path.join("sqbs_configs", filename)
+    full_filename = os.path.join("sqbs_configs", filename)
 
     d = {}
-    with open(file) as f:
+    with open(full_filename) as f:
         d = json.load(f)
 
     if int(time.time()) - d["last_run"] < CONVERSION_REPEAT_DELAY:
         return json.dumps({"error": "Please wait at least {} seconds in between submitting sqbs conversion jobs".format(CONVERSION_REPEAT_DELAY + CONVERSION_SCHEDULE_INTERVAL)})
 
     for item in sqbs_queue:
-        if item[0] == file:
+        if item[0] == full_filename:
             return json.dumps({"error": "You already have a job request for that aggregate sheet"})
 
-    log.info("[{filename}] -- adding to SQBS queue")
-    sqbs_queue.append((file, req["rounds_min"], req["rounds_max"]))
-    with open(file, "w") as f:
+    if not isinstance(req["rounds_min"], int) or not isinstance(req["rounds_max"], int):
+        return json.dumps({"error": "Round numbers must be integers"})
+
+    log.info("f[{filename}] -- adding to SQBS queue")
+    sqbs_queue.append((full_filename, int(req["rounds_min"]), int(req["rounds_max"])))
+    with open(full_filename, "w") as f:
         d["email"] = req["email"]
         json.dump(d, f)
-    return json.dumps({"success": "Your sqbs conversion job has been submitted. You should receive an email within the next few minutes with the resulting sqbs file"})
+    return json.dumps({"success": req["email"]})
 
 
 @app.route("/sqbs/<path:filename>")

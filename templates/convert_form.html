@@ -21,6 +21,7 @@
                     else if (data.success) {
                         setError("");
                         setSuccess("Conversion request successful. You should soon receive an email at " + data.success + " with your SQBS file.");
+                        $("convert-form")[0].reset();
                     }
                 });
 

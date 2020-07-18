@@ -20,6 +20,7 @@
                     else if (data.success) {
                         setError("");
                         setSuccess("Scoresheet generation request successful. If you do not receive an email at " + data.success + " within the next hour, please contact me.");
+                        $("#create-form")[0].reset();
                     }
                 });
 
