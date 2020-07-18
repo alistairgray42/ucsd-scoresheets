@@ -111,6 +111,8 @@ class ScoresheetGenerator:
             # TEMPORARY! Template!
             self.scoresheet_id = "1pv0Z5kvxfij0KCRAQG9lOxfaax-HftmGnDxQn59SDPY"
 
+        self.documentation_id = "1rucjWOWmCq7c8fmqniZ5NCKrHQOCfOkW86TgDbMQkYk"
+
         self.left_col = ["=CONCAT(\"A BP: \",IMPORTRANGE(\"{}\",\"{}!I32\"))", "=CONCAT(\"B BP: \",IMPORTRANGE(\"{}\",\"{}!U32\"))",
                          "TUH", "15", "10", "-5", "Total", "=IMPORTRANGE(\"{}\",\"{}!AA1\")"]
         self.importrange_fstring = "={{IMPORTRANGE(\"{}\",\"{}\"),IMPORTRANGE(\"{}\",\"{}\")}}"
@@ -132,9 +134,9 @@ class ScoresheetGenerator:
 
         file = driveService.files().create(body=file_metadata, fields='id').execute()
         self.folder_id = file.get('id')
+
         # create aggregate sheet, roster sheet, room sheets
-        file_metadata = {"name": "Aggregate Scoresheets",
-                         "parents": [self.folder_id]}
+        file_metadata = {"name": "Aggregate Scoresheets", "parents": [self.folder_id]}
         c = driveService.files().copy(fileId=self.aggregate_id, body=file_metadata).execute()
         self.aggregate_id = c["id"]  # update ID's in place with ID's of copies
 
@@ -147,6 +149,10 @@ class ScoresheetGenerator:
             c = driveService.files().copy(fileId=self.scoresheet_id,
                                           body=file_metadata).execute()
             self.room_ids[room] = c["id"]
+
+        # create documentation doc
+        file_metadata = {"name": "Using UCSD Scoresheets", "parents": [self.folder_id]}
+        c = driveService.files().copy(fileId=self.documentation_id, body=file_metadata).execute()
 
     def populate_aggregate(self):
         data = []
