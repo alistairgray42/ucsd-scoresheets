@@ -58,8 +58,13 @@ def schedule_generation():
             queue.pop(i)
 
             log.info(f"[{filename}] -- Generating scoresheets")
-            generate_from_file(os.path.join("generation_configs", filename))
+            try:
+                generate_from_file(os.path.join("generation_configs", filename))
+            except Exception as e:
+                log.error(f"[{filename}] -- {repr(e)}")
             log.info(f"[{filename}] -- Finished generating scoresheets")
+        else:
+            log.info(f"[{filename}] -- SKIPPED {num_api_calls} required with {api_calls_in_epoch} calls leftover and limit of {API_LIMIT}")
 
             break
 
@@ -205,7 +210,7 @@ def create():
         last_epoch_start = int(time.time())
     queue.append((filename, len(req["rooms"]) * 2 + 1))
 
-    log.info(f"[{filename}] -- adding to creation queue")
+    log.info(f"[{filename}] -- adding to creation queue -- {queue}")
 
     return {"success": req["email"]}
 
@@ -240,7 +245,7 @@ def convert():
     if not isinstance(req["rounds_min"], int) or not isinstance(req["rounds_max"], int):
         return json.dumps({"error": "Round numbers must be integers"})
 
-    log.info("f[{filename}] -- adding to SQBS queue")
+    log.info(f"[{filename}] -- adding to SQBS queue -- {sqbs_queue}")
     sqbs_queue.append((full_filename, int(req["rounds_min"]), int(req["rounds_max"])))
     with open(full_filename, "w") as f:
         d["email"] = req["email"]
