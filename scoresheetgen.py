@@ -305,7 +305,7 @@ class ScoresheetGenerator:
 
         SHARE_MESSAGE = """Thanks for using UCSD Scoresheets!
 
-        This is the folder containing your scoresheets; make sure to go into each sheet and connect them as necessary. (Check the website if you don't know how to do this.)
+        This is the folder containing your scoresheets; make sure to go into each sheet and connect them as necessary. (Check the documentation in the folder if you don't know how to do this.)
         """
 
         self.driveService.permissions().create(fileId=self.folder_id, body=permission, emailMessage=SHARE_MESSAGE).execute()
