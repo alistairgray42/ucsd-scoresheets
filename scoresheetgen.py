@@ -190,7 +190,7 @@ class ScoresheetGenerator:
         res = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.aggregate_id, body=d).execute()
 
     def populate_rooms(self):
-        data = [{"range": "Rosters!A1", "values": [["=IMPORTRANGE(\"{}\", \"Rosters!A:G\")".format(self.roster_id)]]}]
+        data = [{"range": "Rosters!A1", "values": [["=IMPORTRANGE(\"{}\", \"Rosters!A2:G\")".format(self.roster_id)]]}]
 
         for s in self.sheet_names:
             data.append({"range": "{}!{}".format(s, self.A_ROSTERS), "values": [
