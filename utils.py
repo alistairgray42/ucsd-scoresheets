@@ -68,5 +68,5 @@ def authorize_email(email):
     connection = sqlite3.connect('database.db')
     cursor = connection.cursor()
 
-    cursor.execute("SELECT COUNT(*) FROM emails WHERE email = ? LIMIT 1", (email,))
+    cursor.execute("SELECT COUNT(*) FROM emails WHERE email LIKE ? LIMIT 1", (email,))
     return int(cursor.fetchone()[0]) != 0
