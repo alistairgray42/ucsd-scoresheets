@@ -141,7 +141,7 @@ def validate_convert_args(args):
 
     # validate against pre-approved emails
     if not authorize_email(args["email"]):
-        return {"error": err_dict["email"]}
+        return {"error": err_dict["unauthorized"]}
 
     # check round min and round max are integers, in the correct range, and min < max
     try:
@@ -164,7 +164,7 @@ def validate_convert_args(args):
     if os.path.isfile(os.path.join("sqbs_configs", generate_filename(args["email"], ".json"))):
         return False
 
-    return {"error": err_dict["agg"]}
+    return {"error": err_dict["unauthorized"]}
 
 
 @app.route("/")
