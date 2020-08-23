@@ -14,7 +14,7 @@ from flask import Flask, jsonify, render_template, request, send_from_directory
 
 from scoresheetgen import generate_from_file
 from convert_to_sqbs import convert_to_sqbs
-from utils import authorize_email, generate_filename
+from utils import authorize_email, generate_filename, StreamLogger
 
 GENERATION_SCHEDULE_INTERVAL = 15
 CONVERSION_SCHEDULE_INTERVAL = 15
@@ -35,11 +35,14 @@ sqbs_queue = []
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
-handler = logging.handlers.TimedRotatingFileHandler("logs/log", when='D', backupCount=5)
-formatter = logging.Formatter(style="%", fmt="%(asctime)s - %(levelname)s - %(message)s")
-handler.setFormatter(formatter)
-log.addHandler(handler)
 
+fileHandler = logging.handlers.TimedRotatingFileHandler("logs/log", when='D', backupCount=5)
+formatter = logging.Formatter(style="%", fmt="%(asctime)s - %(levelname)s - %(message)s")
+fileHandler.setFormatter(formatter)
+log.addHandler(fileHandler)
+
+sl = StreamLogger(log, logging.ERROR)
+sys.stderr = sl
 
 def schedule_generation():
     global queue

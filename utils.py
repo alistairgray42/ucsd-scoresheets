@@ -1,5 +1,8 @@
+import logging
 import re
 import sqlite3
+import sys
+
 from email.message import EmailMessage
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
@@ -70,3 +73,18 @@ def authorize_email(email):
 
     cursor.execute("SELECT COUNT(*) FROM emails WHERE email LIKE ? LIMIT 1", (email,))
     return int(cursor.fetchone()[0]) != 0
+
+# from https://stackoverflow.com/questions/19425736/how-to-redirect-stdout-and-stderr-to-logger-in-python
+class StreamLogger():
+   """
+   Fake file-like stream object that redirects writes to a logger instance.
+   """
+   def __init__(self, logger, log_level=logging.INFO):
+      self.logger = logger
+      self.log_level = log_level
+      self.linebuf = ''
+
+   def write(self, buf):
+      for line in buf.rstrip().splitlines():
+         self.logger.log(self.log_level, line.rstrip())
+
