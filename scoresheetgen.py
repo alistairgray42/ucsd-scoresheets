@@ -89,6 +89,10 @@ class ScoresheetGenerator:
             self.TEAM_A_VAL = "AC"
             self.TEAM_B_VAL = "AD"
 
+            self.left_col = ["=CONCAT(\"A BP: \",IMPORTRANGE(\"{}\",\"{}!I32\"))",
+                             "=CONCAT(\"B BP: \",IMPORTRANGE(\"{}\",\"{}!U32\"))", "TUH", "15",
+                             "10", "-5", "Total", "=IMPORTRANGE(\"{}\",\"{}!AA1\")"]
+
             # TEMPORARY! Template!
             self.scoresheet_id = "1_XuTrn4cmxE1IxGzOkc8l-VqMaE-vn1eWzwv8rs1lyE"
 
@@ -108,13 +112,15 @@ class ScoresheetGenerator:
             self.TEAM_A_VAL = "Y"
             self.TEAM_B_VAL = "Z"
 
+            self.left_col = ["=CONCAT(\"A BP: \",IMPORTRANGE(\"{}\",\"{}!I32\"))",
+                             "=CONCAT(\"B BP: \",IMPORTRANGE(\"{}\",\"{}!S32\"))", "TUH", "15",
+                             "10", "-5", "Total", "=IMPORTRANGE(\"{}\",\"{}!W1\")"]
+
             # TEMPORARY! Template!
             self.scoresheet_id = "1pv0Z5kvxfij0KCRAQG9lOxfaax-HftmGnDxQn59SDPY"
 
         self.documentation_id = "1rucjWOWmCq7c8fmqniZ5NCKrHQOCfOkW86TgDbMQkYk"
 
-        self.left_col = ["=CONCAT(\"A BP: \",IMPORTRANGE(\"{}\",\"{}!I32\"))", "=CONCAT(\"B BP: \",IMPORTRANGE(\"{}\",\"{}!U32\"))",
-                         "TUH", "15", "10", "-5", "Total", "=IMPORTRANGE(\"{}\",\"{}!AA1\")"]
         self.importrange_fstring = "={{IMPORTRANGE(\"{}\",\"{}\"),IMPORTRANGE(\"{}\",\"{}\")}}"
 
     def create_scoresheets(self):
