@@ -14,7 +14,7 @@ from flask import Flask, jsonify, render_template, request, send_from_directory
 
 from scoresheetgen import generate_from_file
 from convert_to_sqbs import convert_to_sqbs
-from utils import authorize_email, generate_filename, StreamLogger
+from utils import authorize_email, generate_filename, generate_filename_with_rounds, StreamLogger
 
 GENERATION_SCHEDULE_INTERVAL = 15
 CONVERSION_SCHEDULE_INTERVAL = 15
@@ -74,10 +74,10 @@ def schedule_generation():
 
 def schedule_sqbs_conversion():
     if len(sqbs_queue) > 0:
-        filename, round_min, round_max = sqbs_queue.pop(0)
+        filename, round_min, round_max, tossups_per_game = sqbs_queue.pop(0)
 
         log.info(f"[{filename}] -- Running SQBS job")
-        convert_to_sqbs(filename, round_min, round_max)
+        convert_to_sqbs(filename, round_min, round_max, tossups_per_game)
         log.info(f"[{filename}] -- Finished running SQBS job")
 
 
@@ -92,7 +92,7 @@ def validate_create_args(args):
     }
 
     # check if any required arguments aren't present (after client-side validation)
-    for check_var in ("tourney_name", "email", "rooms"):
+    for check_var in ("tourney_name", "email", "rooms", "tossups_per_game"):
         if check_var not in args:
             return {"error": err_dict["missing"].format(check_var)}
 
@@ -232,28 +232,39 @@ def convert():
         return json.dumps(invalid)
 
     filename = generate_filename(req["email"], ".json")
-    full_filename = os.path.join("sqbs_configs", filename)
+    sqbs_filename = generate_filename_with_rounds(req["email"], req["rounds_min"], req["rounds_max"], ".sqbs")
+    full_sqbs_filename = os.path.join("sqbs_configs", filename)
+    full_generation_filename = os.path.join("generation_configs", filename)
 
     d = {}
-    with open(full_filename) as f:
+    with open(full_sqbs_filename) as f:
         d = json.load(f)
 
     if int(time.time()) - d["last_run"] < CONVERSION_REPEAT_DELAY:
         return json.dumps({"error": "Please wait at least {} seconds in between submitting sqbs conversion jobs".format(CONVERSION_REPEAT_DELAY + CONVERSION_SCHEDULE_INTERVAL)})
 
     for item in sqbs_queue:
-        if item[0] == full_filename:
+        if item[0] == full_sqbs_filename:
             return json.dumps({"error": "You already have a job request for that aggregate sheet"})
 
     if not isinstance(req["rounds_min"], int) or not isinstance(req["rounds_max"], int):
         return json.dumps({"error": "Round numbers must be integers"})
 
+    g = {}
+    with open(full_generation_filename) as f:
+        g = json.load(f)
+
+    if "tossups_per_game" in g:
+        tossups_per_game = int(g["tossups_per_game"])
+    else:
+        tossups_per_game = 20
+
     log.info(f"[{filename}] -- adding to SQBS queue -- {sqbs_queue}")
-    sqbs_queue.append((full_filename, int(req["rounds_min"]), int(req["rounds_max"])))
-    with open(full_filename, "w") as f:
+    sqbs_queue.append((full_sqbs_filename, int(req["rounds_min"]), int(req["rounds_max"]), tossups_per_game))
+    with open(full_sqbs_filename, "w") as f:
         d["email"] = req["email"]
         json.dump(d, f)
-    return json.dumps({"success": req["email"]})
+    return json.dumps({"success": sqbs_filename})
 
 
 @app.route("/sqbs/<path:filename>")

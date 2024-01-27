@@ -1,74 +1,101 @@
 <html lang="en">
 
-<head>
-    <meta charset="utf-8">
-    <title>UCSD Scoresheets | Create</title>
-    <link rel="stylesheet" type="text/css" href="/static/style.css">
+	<head>
+		<meta charset="utf-8">
+		<title>UCSD Scoresheets | Create</title>
+		<link rel="stylesheet" type="text/css" href="/static/style.css">
 
-    <script src="../static/error-success.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script>
-        $(document).ready(() => {
-            $("#create-form").submit((e) => {
-                e.preventDefault();
+		<script src="../static/error-success.js"></script>
+		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+		<script>
+			$(document).ready(() => {
+				setError = function (message) {
+					if (message) {
+						$("#error").html(message);
+						$("#error").show();
+					}
+					else {
+						$("#error").hide();
+					}
+				}
 
-                $.getJSON("/create/submit", $("#create-form").serialize(), (data) => {
-                    if (data.error) {
-                        setSuccess("");
-                        setError("Error: " + data.error);
-                    }
-                    else if (data.success) {
-                        setError("");
-                        setSuccess("Scoresheet generation request successful. If you do not receive an email at " + data.success + " within the next hour, please contact me.");
-                        $("#create-form")[0].reset();
-                    }
-                });
+				setSuccess = function (message) {
+					if (message) {
+						$("#success").html(message);
+						$("#success").show();
+					}
+					else {
+						$("#success").hide();
+					}
+				}
 
-            })
+				$("#create-form").submit((e) => {
+					e.preventDefault();
 
-        });
-    </script>
-</head>
+					$.getJSON("/create/submit", $("#create-form").serialize(), (data) => {
+						if (data.error) {
+							setSuccess("");
+							setError("Error: " + data.error);
+						}
+						else if (data.success) {
+							setError("");
+							setSuccess("Scoresheet generation request successful. If you do not receive an email at " + data.success + " within the next hour, please contact me.");
+							$("#create-form")[0].reset();
+						}
+					});
 
-<body>
-    {% include 'header.html' %}
-    <div id="wrapper">
+				})
 
-        <h1>
-            Create Scoresheets
-        </h1>
+			});
+		</script>
+	</head>
 
-        <p>
-            This form allows you to create sets of UCSD Scoresheets. <b>You cannot create scoresheets unless I approve
-                your email address</b> - due to Google's API limits, I don't plan to open this functionality to the
-            general public.
-        </p>
+	<body>
+		{% include 'header.html' %}
+		<div id="wrapper">
 
-        <div id="error"></div>
-        <div id="success"></div>
+			<h1>
+				Create Scoresheets
+			</h1>
 
-        <form id="create-form">
-            <div class="form-grid">
-                <label class="input-prompt" for="tourney_name">Tournament name:</label>
-                <input type="text" name="tourney_name" id="tourney_name" placeholder="Tournament name" required>
+			<p>
+			This form allows you to create sets of UCSD Scoresheets. <b>You cannot create scoresheets unless I approve
+				your email address</b> - due to Google's API limits, I don't plan to open this functionality to the
+			general public.
+			</p>
 
-                <label class="input-prompt" for="email">Email:</label>
-                <input type="email" name="email" id="email" placeholder="Email" required>
+			<div id="error"></div>
+			<div id="success"></div>
 
-                <label class="input-prompt" for="bonus_tracking">Track bonus parts individually?</label>
-                <input type="checkbox" name="bonus_tracking" id="bonus_tracking">
+			<form id="create-form">
+				<div class="form-grid">
+					<label class="input-prompt" for="tourney_name">Tournament name:</label>
+					<input type="text" name="tourney_name" id="tourney_name" placeholder="Tournament name" required autofocus>
 
-                <label class="input-prompt" for="rooms">List of rooms (max 35):</label>
-                <textarea name="rooms" id="rooms" placeholder="Rooms (one per line)" required></textarea>
-            </div>
+					<label class="input-prompt" for="email">Email:</label>
+					<input type="email" name="email" id="email" placeholder="Email" required>
 
-            <div class="centering-div">
-                <input type="submit" id="submit" value="Submit">
-            </div>
+					<label class="input-prompt" for="bonus_tracking">Track bonus parts individually?</label>
+					<input type="checkbox" name="bonus_tracking" id="bonus_tracking">
 
-        </form>
+					<label class="input-prompt" for="tossups_per_game">Tossups per game</label>
+					<select name="tossups_per_game" id="tossups_per_game">
+						<option value=20>20</option>
+						<option value=22>22</option>
+						<option value=24>24</option>
+					</select>
 
-    </div>
-</body>
+					<label class="input-prompt" for="rooms">List of rooms (max 35):</label>
+					<textarea name="rooms" id="rooms" placeholder="Rooms (one per line)" required></textarea>
+				</div>
+
+				<div class="centering-div">
+					<input type="submit" id="submit" value="Submit">
+				</div>
+
+			</form>
+
+		</div>
+	</body>
 
 </html>

@@ -8,9 +8,28 @@
     <script src="../static/error-success.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script>
-        $(document).ready(() => {
-            $("#convert-form").submit((e) => {
+	$(document).ready(() => {
+	setError = function (message) {
+	    if (message) {
+		$("#error").html(message);
+		$("#error").show();
+	    }
+	    else {
+		$("#error").hide();
+	    }
+	}
 
+	setSuccess = function (message) {
+	    if (message) {
+		$("#success").html(message);
+		$("#success").show();
+	    }
+	    else {
+		$("#success").hide();
+	    }
+	}
+
+	    $("#convert-form").submit((e) => {
                 e.preventDefault();
 
                 $.getJSON("/convert/submit", $("#convert-form").serialize(), (data) => {
@@ -20,7 +39,7 @@
                     }
                     else if (data.success) {
                         setError("");
-                        setSuccess("Conversion request successful. You should soon receive an email at " + data.success + " with your SQBS file.");
+			setSuccess("Conversion request successful. Your SQBS file will be ready (in a second!) at <a href=\"https://ucsd-scoresheets.com/sqbs/" + data.success + "\"> this link </a>.");
                         $("convert-form")[0].reset();
                     }
                 });
@@ -55,15 +74,15 @@
         <p>
             Limitations:
         <ul>
-            <li>This feature only supports standard game lengths and point values: i.e. twenty tossups scored 15/10/-5,
-                and twenty corresponding bonuses with three parts worth ten points each.</li>
+	    <li>This feature only supports standard game lengths and point values: i.e. twenty (or twenty-two or 
+	        twenty-four) tossups scored 15/10/-5, and corresponding bonuses with three parts worth ten points each.</li>
             <li>Player names cannot be changed once the tournament starts, unless you manually change players' names in
-                each of the room spreadsheets where they played. </li>
+                each of the room spreadsheets where they played.</li>
             <li>If room spreadsheets are incorrectly filled out, conversion may be incorrect; if it is incorrect, you
                 might or might not be notified of that. Once again, always have a person who can use SQBS on hand, and
                 make sure to check SQBS files and web reports before posting publicly.</li>
             <li>By design, this page will only send SQBS stats to the accounts that created scoresheets, and will
-                only convert the last-created set of scoresheets. </li>
+                only convert the last-created set of scoresheets.</li>
         </ul>
         </p>
 

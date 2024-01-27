@@ -54,6 +54,10 @@ def generate_filename(s, ext="", timestamp=None):
     return md5(bytes(s, "utf-8")).hexdigest()[:10] + ("_" + str(timestamp) if timestamp else "") + ext
 
 
+def generate_filename_with_rounds(s, rounds_min, rounds_max, ext=""):
+    return md5(bytes(s, "utf-8")).hexdigest()[:10] + "_" + str(rounds_min) + "_" + str(rounds_max) + ext
+
+
 def validate_spreadsheet(s):
     url_match = re.search(r'/spreadsheets/d/([a-zA-Z0-9-_]+)', s)
     id_match = re.match(r'(^[a-zA-Z0-9-_]+$)', s)
