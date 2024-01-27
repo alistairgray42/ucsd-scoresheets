@@ -1,41 +1,37 @@
 from __future__ import print_function
-import httplib2
 import os
 import pickle
-import string
 import json
 import time
-
-import numpy as np
 
 from apiclient import discovery
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
-from copy import copy
-from time import sleep
+checkboxed = True
+
+##############################################################################
 
 # Constants for checkboxed sheets
-RANGE_START = "C1"
-RANGE_END = "W23"
+if checkboxed:
+    RANGE_START = "C1"
+    RANGE_END = "W23"
 
-NUM_PLAYERS = 6
-B_COL_LEN = 3
-T2_START = 12
+    NUM_PLAYERS = 6
+    B_COL_LEN = 3
+    T2_START = 12
 
-"""
+else:
 # Constants for noncheckboxed sheets
-RANGE_START = "C1"
-RANGE_END = "S23"
+    RANGE_START = "C1"
+    RANGE_END = "S23"
 
-NUM_PLAYERS = 6
-B_COL_LEN = 1
-T2_START = 10
-"""
+    NUM_PLAYERS = 6
+    B_COL_LEN = 1
+    T2_START = 10
 
 T1_B_START = NUM_PLAYERS
 T2_B_START = T2_START + NUM_PLAYERS
-
 
 # If modifying these scopes, delete your previously saved credentials
 # at ~/.credentials/sheets.googleapis.com-python-quickstart.json
@@ -49,8 +45,6 @@ CLIENT_SECRET_FILE = 'client_secrets.json'
 APPLICATION_NAME = 'Google Sheets API Python Quickstart'
 
 # from Google Sheets API v4 Python quickstart
-
-
 def get_credentials(filename):
     creds = None
     # The file  stores the user's access and refresh tokens, and is
@@ -74,12 +68,8 @@ def get_credentials(filename):
 
 
 credentials = get_credentials(DRIVE_CRED_FILE)
-discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?'
-                'version=v4')
-
-service = discovery.build('sheets', 'v4', credentials=credentials,
-                          discoveryServiceUrl=discoveryUrl)
-
+discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?version=v4')
+service = discovery.build('sheets', 'v4', credentials=credentials, discoveryServiceUrl=discoveryUrl)
 sheets = service.spreadsheets()
 
 tossups = dict()
@@ -128,26 +118,9 @@ def assign_b(data):
     return ret
 
 
-def read_scoresheets():
+def read_scoresheets(round_min, round_max, scoresheet_ids):
     for round_num in range(1, 12):
-        """
-        for scoresheet_id in [ "1fW2a_7IhQoOzb4Pbq4Cck8TWEd3KST2zYlJOM34UFsw",  # AM
-                            "1cm_X3R9kyX9NSzXc_h6kwN8K-rFJ4A9ejlzQvNLHTfs",  # CA
-                            "1KWxsh9SG3hVv9oPANMgBaVu2paCaXZJ9mvvLlmmgBxM",  # EL
-                            "1iJdRBE9FsstO4PIFL9Isz2g_G888lujytutxC-2IQHE",  # EU
-                            "1AzvmJUTjCKCtcFZdPPUypMae-o2dFtCNd6W3bzhDNkQ",  # GA
-                            "1tUU0c3PtXX2awuRSUBmvxHsrsdDZbBEHuBRDhnFrD-w",  # HI
-                            "1ifT3Ry5bEZqxydr--mBpFlNk3JKncLFQ9_WRScDLIjA",  # IO
-                            "1aWiCum5G4tEBY8UY9HRYJh2zc4-zDFrbgYP3Pz-HF_Y"]: # TH
-        """
-        for scoresheet_id in ["1BjMO6lGSM3wCcLFcUsd57s908ktAxfYUCA8YYGm8AaA",  # AN
-                              "1Oq9nrm41jsr0IO2jy9Tl3OxRgzPmVTjNCC1dV3EvnGo",  # AT
-                              "1vQ6tZiqSyT-69QEKfR9wL5y_Z7lWBrNH_7k-oQQzLaM",  # HE
-                              "1f61R63mu1tAKpOmoWf9w9HLzAUCCpFin44QWAHfw6Yw",  # HI
-                              "10vyI4LZlhOEqpW5yJSUAMKtRYzj38czIkJkri44dT5Q",  # LO
-                              "1EutvpQxciHIwLps-CaPHcmVS9ZXfsvfZPAsA8hN1d6E",  # OR
-                              "1bLSaXbbKtxAGirTRuf-waexc4uifg-NBHeCiGjeUL9I",  # OU
-                              "1aD3Ft0T0DLMw0x5-0FmiLhjgyC9BX9AEeB21nFdyboA"]:  # PR
+        for scoresheet_id in scoresheet_ids:
 
             result = sheets.values().get(spreadsheetId=scoresheet_id,
                                          range=f"Round {round_num}!{RANGE_START}:{RANGE_END}").execute()
@@ -179,9 +152,11 @@ def read_scoresheets():
                 t2_tus.append(t2_tu)
 
                 # track bonuses of dead tossups correctly
-                if t1_tu > 0 or t2_tu > 0:
-                    t1_bs.append(t1_b)
-                    t2_bs.append(t2_b)
+                # if t1_tu > 0 or t2_tu > 0:
+                    # t1_bs.append(t1_b)
+                    # t2_bs.append(t2_b)
+                t1_bs.append(t1_b)
+                t2_bs.append(t2_b)
 
             if team_1 not in tossups:
                 tossups[team_1] = dict()
@@ -212,26 +187,12 @@ def read_scoresheets():
         if max(team.keys()) > max_round_num:
             max_round_num = max(team.keys())
 
-    num_teams = len(tossups)
-
-    np_tossups = np.full((num_teams, max_round_num, 20), -1)
-    np_bonuses = np.full((num_teams, max_round_num, 20), -1)
-
     team_names = list(tossups.keys())
 
-    for team_number, team_data in enumerate(tossups.values()):
-        for round_num, tossup_data in team_data.items():
-            np_tossups[team_number][round_num -
-                                    1][:len(tossup_data)] = tossup_data
-
-    for team_number, team_data in enumerate(bonuses.values()):
-        for round_num, bonus_data in team_data.items():
-            np_bonuses[team_number][round_num -
-                                    1][:len(bonus_data)] = bonus_data
-
-    with open("stan_stats", "w") as f:
-        json.dump({"tossups": tossups, "bonuses": bonuses,
-                   "teams": team_names}, f)
+    data = {"tossups": tossups, "bonuses": bonuses, "teams": team_names}
+    with open("stats", "w") as f:
+        json.dump(data, f)
+    return read_from_file(data)
 
 
 def compute_p_n_counts(data):
@@ -256,9 +217,16 @@ def compute_p_n_counts(data):
             print(stats[(i, j)], end=" ")
         print()
 
+def compute_tossup_conversion(data, max_round):
+    for q_num in range(1, 21):
+        print(q_num, end=",,,,,")
+    print("")
 
-def compute_conversion(data):
-    for packet in range(1, 11):
+    for _ in range(1, 21):
+        print("15,10,-5,,,", end="")
+    print("")
+
+    for packet in range(1, max_round):
         for tossup in range(20):
             tu_stats = {15: 0, 10: 0, -5: 0}
             for team in data["teams"]:
@@ -267,21 +235,72 @@ def compute_conversion(data):
                 points = data["tossups"][team][str(packet)][tossup]
                 if points in tu_stats:
                     tu_stats[points] += 1
-            print("{}/{}/{}".format(tu_stats[15],
-                                    tu_stats[10], tu_stats[-5]), end="\t")
+            print("{},{},{},,,".format(tu_stats[15], tu_stats[10], tu_stats[-5]), end="")
         print("")
 
-# read_scoresheets()
 
+def compute_bonus_conversion(data, max_round):
+    for q_num in range(1, 21):
+        print(q_num, end=",,,,,")
+    print("")
 
-# with open("stan_stats", "r") as f:
-s = open("stan_stats", "r")
-s_data = json.load(s)
-c = open("comp_stats", "r")
-c_data = json.load(c)
+    for _ in range(1, 21):
+        print("1,2,3,,,", end="")
+    print("")
 
-merged = {"tossups": {**c_data["tossups"], **s_data["tossups"]},
-          "bonuses": {**c_data["bonuses"], **s_data["bonuses"]},
-          "teams": c_data["teams"] + s_data["teams"]}
+    overall_stats_string = ""
+    for packet in range(1, max_round):
+        for bonus in range(20):
+            b_stats = {1: 0, 2: 0, 3: 0, 0: 0, 10: 0, 20: 0, 30: 0}
+            for team in data["teams"]:
+                if str(packet) not in data["bonuses"][team]:
+                    continue
+                if bonus >= len(data["bonuses"][team][str(packet)]):
+                    continue
+                points = data["bonuses"][team][str(packet)][bonus]
+                if points >= 0:
+                    parts = 0
+                    if points >= 4:
+                        b_stats[1] += 1
+                        parts += 1
+                    if points == 2 or points == 3 or points == 6 or points == 7:
+                        b_stats[2] += 1
+                        parts += 1
+                    if points % 2 == 1:
+                        b_stats[3] += 1
+                        parts += 1
 
-compute_p_n_counts(merged)
+                    b_stats[parts * 10] += 1
+
+            print("{},{},{},,,".format(b_stats[1], b_stats[2], b_stats[3]), end="")
+            overall_stats_string += "{},{},{},{},,".format(b_stats[0], b_stats[10], b_stats[20], b_stats[30])
+        print("")
+        overall_stats_string += "\n"
+    print("")
+
+    for q_num in range(1, 21):
+        print(q_num, end=",,,,,")
+    print("")
+
+    for _ in range(1, 21):
+        print("0,10,20,30,,", end="")
+
+    print("")
+
+    print(overall_stats_string)
+
+def compute_conversion(data, max_round):
+    compute_tossup_conversion(data, max_round)
+    compute_bonus_conversion(data, max_round)
+
+def read_from_file(filename):
+    return json.load(open(filename, "r"))
+
+def combine_two(filename_1, filename_2):
+    data_1 = json.load(open(filename_1, "r"))
+    data_2 = json.load(open(filename_2, "r"))
+
+    merged = {"tossups": {**data_1["tossups"], **data_2["tossups"]},
+            "bonuses": {**data_1["bonuses"], **data_2["bonuses"]},
+            "teams": data_1["teams"] + data_2["teams"]}
+    print(merged)
