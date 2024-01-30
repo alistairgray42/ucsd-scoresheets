@@ -1,0 +1,145 @@
+/* fira-sans-regular - latin */
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Fira Sans Regular'), local('FiraSans-Regular'),
+       url('fonts/fira-sans-v10-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('fonts/fira-sans-v10-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+* {
+    font-family: 'Fira Sans', sans-serif;
+}
+
+
+#title,h1 {
+    font-weight: 900;
+    color: black;
+}
+
+#title { font-size: 40px; padding: 20px 0px; }
+h1 { font-size: 20px; }
+
+a {
+    color: #25252c;
+    text-decoration: underline;
+}
+
+a:hover {
+    color: #ec5d57;
+}
+
+body {
+    background-color: #cec0eb;
+}
+
+li {
+    margin-bottom: 5px;
+}
+
+#page-header{
+    margin-left: auto;
+    margin-right: auto;
+
+    margin-bottom: 1.5%;
+    padding: 1.5% 3% 1.5% 3%;
+
+    background-color: #e7dff7;
+    border: 1px solid black;
+    border-radius: 8px;
+
+    max-width: 600px;
+}
+
+.header-row{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+#wrapper{
+    max-width: 600px;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    padding: 1.5% 3% 1.5% 3%;
+
+    background-color: #e7dff7;
+
+    border: 1px solid black;
+    border-radius: 8px;
+}
+
+#error, #success {
+    margin-top: 15px;
+    margin-bottom: 15px;
+
+    padding: 15px 15px;
+
+    border: 1px solid black;
+    border-radius: 8px;
+}
+
+#error { background-color: #ec5d57; }
+#success { background-color: #8b5dbb; color: white;}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: auto auto;
+
+    align-items: center;
+
+    gap: 12px;
+    padding-bottom: 24px;
+}
+
+.input-prompt :not(#bonus_tracking) {
+    grid-column-start: 1;
+    grid-column-end: 1;
+
+    align-self: center;
+} 
+
+#rooms {
+    resize: vertical;
+    min-height: 100px;
+}
+
+#rooms, #tourney_name, #email {
+    border-radius: 5px;
+    box-shadow: none;
+    border: 1px solid lightgray;
+    padding: 5px;
+
+    font-size: 14px;
+}
+
+#rounds_min_max {
+    display: flex;
+    justify-content: space-between;
+}
+
+.centering-div {
+    display: flex;
+    justify-content: center;
+}
+
+#submit {
+    margin-top: 1.5em;
+
+    background-color: #8b5dbb;
+    color: white;
+    padding: 0.6em 5em;
+    border: 1px solid black;
+    border-radius: 8px;
+
+    font-weight: 900;
+    font-size: 14px;
+
+}
+
+#submit:hover {
+    background-color: #ec5d57;
+}
